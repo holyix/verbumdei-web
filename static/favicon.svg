@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-label="Verbum Quest favicon">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#6b21a8"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="10" fill="url(#grad)"/>
+  <path d="M16 16h32l-6 10H22l-6-10zm6 12h20L32 48 22 28zm0 0l-6 18h12l-6-18z" fill="#fff" opacity="0.94"/>
+</svg>
