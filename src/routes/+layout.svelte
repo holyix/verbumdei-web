@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-
-    export let data;
+    import "$lib/styles/theme.css";
 
     onMount(() => {
         // Only register SW in production builds; dev server doesn't emit it.

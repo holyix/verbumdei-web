@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap");
+
+:root {
+    --bg: #0c1224;
+    --surface: #0d1326;
+    --surface-soft: rgba(255, 255, 255, 0.04);
+    --surface-strong: rgba(255, 255, 255, 0.08);
+    --text: #e9edf4;
+    --text-subtle: #cbd3e6;
+    --accent: #c7a457;
+    --accent-strong: #9b7a38;
+    --outline-strong: rgba(255, 255, 255, 0.12);
+    --outline-soft: rgba(255, 255, 255, 0.08);
+    --success: #35d69d;
+    --danger: #e95d5d;
+    --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+    --font-display: "Playfair Display", "DM Sans", serif;
+}
+
+:global(body) {
+    margin: 0;
+    background: radial-gradient(
+            circle at 18% 18%,
+            rgba(198, 167, 96, 0.18),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 82% 12%,
+            rgba(104, 132, 170, 0.2),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 42% 78%,
+            rgba(127, 83, 74, 0.16),
+            transparent 34%
+        ),
+        var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+}
