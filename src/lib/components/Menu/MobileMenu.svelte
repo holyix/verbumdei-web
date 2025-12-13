@@ -1,5 +1,6 @@
 <script lang="ts">
     import LanguageSwitcher from "./LanguageSwitcher.svelte";
+    import ThemeToggle from "./ThemeToggle.svelte";
     import type { Locale } from "$lib/types";
 
     export let menuOpen = false;
@@ -12,10 +13,13 @@
     export let loginLabel: string;
     export let guestPrefLabel: string;
     export let languageLabel: string;
+    export let styleLabel: string;
     export let languages: { id: Locale; label: string; name: string }[] = [];
     export let locale: Locale;
     export let flags: Record<Locale, string> = { en: "🇬🇧", es: "🇪🇸", pt: "🇧🇷" };
     export let selectLanguage: (id: Locale) => void;
+    export let theme: "light" | "dark";
+    export let toggleTheme: () => void;
 </script>
 
 <div class="mobile-menu" aria-label="User menu">
@@ -33,6 +37,7 @@
                 <span></span>
             </span>
         </button>
+        <ThemeToggle {theme} toggle={toggleTheme} showText={false} />
         {#if menuOpen}
             <div class="menu-dropdown mobile" id="user-menu">
                 <div class="mobile-profile stacked">
@@ -45,6 +50,10 @@
                     <div class="menu-label">{accountLabel}</div>
                     <button class="menu-item">{loginLabel}</button>
                     <button class="menu-item muted">{guestPrefLabel}</button>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-label">{styleLabel}</div>
+                    <ThemeToggle {theme} toggle={toggleTheme} />
                 </div>
                 <div class="menu-section">
                     <div class="menu-label">{languageLabel}</div>
@@ -67,14 +76,16 @@
 
     .menu-wrapper {
         position: relative;
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        width: 100%;
     }
 
     .menu-toggle {
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--outline-strong);
+        background: var(--surface-soft);
         border-radius: 12px;
         padding: 0.5rem 0.6rem;
         cursor: pointer;
@@ -86,8 +97,8 @@
 
     .menu-toggle:hover {
         transform: translateY(-1px);
-        border-color: rgba(242, 210, 141, 0.6);
-        box-shadow: 0 8px 18px rgba(15, 20, 45, 0.5);
+        border-color: var(--accent);
+        box-shadow: 0 8px 18px var(--shadow-soft);
     }
 
     .hamburger {
@@ -99,7 +110,7 @@
         display: block;
         width: 20px;
         height: 2px;
-        background: #f7f8ff;
+        background: var(--text);
     }
 
     .menu-dropdown {
@@ -107,10 +118,10 @@
         top: calc(100% + 0.6rem);
         right: 0;
         min-width: 250px;
-        background: rgba(10, 14, 31, 0.98);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--menu-surface);
+        border: 1px solid var(--outline-strong);
         border-radius: 14px;
-        box-shadow: 0 18px 40px rgba(6, 10, 25, 0.7);
+        box-shadow: 0 18px 40px var(--menu-shadow);
         padding: 0.75rem;
         display: grid;
         gap: 0.6rem;
@@ -126,15 +137,15 @@
     }
 
     .mobile-profile {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--surface-soft);
+        border: 1px solid var(--outline-strong);
         border-radius: 12px;
         padding: 0.75rem 0.85rem;
         margin-bottom: 0.5rem;
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
-        box-shadow: 0 12px 24px rgba(12, 18, 36, 0.45);
+        box-shadow: 0 12px 24px var(--shadow-soft);
     }
 
     .mobile-profile.stacked {
@@ -145,7 +156,7 @@
     }
 
     .panel-username {
-        color: #f7f8ff;
+        color: var(--text);
         font-weight: 800;
         letter-spacing: 0.02em;
     }
@@ -154,11 +165,11 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.8rem;
-        color: #d3ddf2;
+        color: var(--text-subtle);
     }
 
     .stat-label {
-        color: #d3ddf2;
+        color: var(--text-subtle);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.78rem;
@@ -173,13 +184,13 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.75rem;
-        color: #d3ddf2;
+        color: var(--text-subtle);
     }
 
     .menu-item {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.04);
-        color: #f7f8ff;
+        border: 1px solid var(--outline-soft);
+        background: var(--surface-soft);
+        color: var(--text);
         border-radius: 10px;
         padding: 0.65rem 0.75rem;
         text-align: left;
@@ -189,7 +200,7 @@
     }
 
     .menu-item.muted {
-        color: #c8d0e3;
+        color: var(--text-subtle);
         font-weight: 600;
         border-style: dashed;
     }
@@ -201,6 +212,7 @@
             top: 12px;
             left: 12px;
             z-index: 12;
+            width: calc(100vw - 24px);
         }
     }
 </style>

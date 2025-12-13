@@ -27,10 +27,10 @@
         inset: 0;
         background: radial-gradient(
                 circle at 40% 20%,
-                rgba(199, 164, 87, 0.12),
-                rgba(12, 18, 36, 0.48)
+                var(--overlay-spot),
+                color-mix(in srgb, var(--bg) 50%, transparent)
             ),
-            rgba(8, 12, 26, 0.38);
+            var(--overlay-backdrop);
         backdrop-filter: blur(6px);
         display: grid;
         place-items: center;
@@ -44,24 +44,20 @@
         gap: 1rem;
         max-width: 640px;
         width: min(92vw, 640px);
-        background: rgba(14, 20, 40, 0.92);
-        border: 1px solid rgba(199, 164, 87, 0.25);
+        background: var(--surface);
+        border: 1px solid var(--accent-soft);
         border-radius: 16px;
         padding: 1.2rem;
-        box-shadow: 0 24px 50px rgba(6, 10, 25, 0.55);
+        box-shadow: 0 24px 50px var(--shadow-strong);
         animation: cardFloat 680ms ease 120ms both;
         box-sizing: border-box;
     }
 
     .victory-art {
         position: relative;
-        background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.04),
-            rgba(255, 255, 255, 0.02)
-        );
+        background: linear-gradient(180deg, var(--surface-strong), var(--surface-soft));
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--outline-soft);
         padding: 0.75rem;
         display: grid;
         place-items: center;
@@ -111,7 +107,7 @@
 
     .victory-copy h3 {
         margin: 0;
-        color: #f7f8ff;
+        color: var(--text);
         font-size: 1.3rem;
         line-height: 1.4;
     }
@@ -119,8 +115,8 @@
     .primary {
         margin: 0.25rem auto 0;
         background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        color: #0d0f1d;
-        box-shadow: 0 10px 20px rgba(12, 18, 36, 0.4);
+        color: var(--ink-strong);
+        box-shadow: 0 10px 20px var(--shadow-soft);
         border: none;
         border-radius: 10px;
         padding: 0.78rem 1.2rem;

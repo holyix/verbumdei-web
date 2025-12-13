@@ -6,7 +6,7 @@
     import SceneBanner from "$lib/components/SceneBanner/SceneBanner.svelte";
     import VictoryOverlay from "$lib/components/VictoryOverlay/VictoryOverlay.svelte";
     import type { Level, Locale, Question } from "$lib/types";
-    import { onDestroy } from "svelte";
+    import { onDestroy, onMount } from "svelte";
 
     const uiText: Record<Locale, Record<string, string>> = {
         en: {
@@ -444,6 +444,8 @@
         pt: "🇧🇷",
     };
 
+    type Theme = "light" | "dark";
+
     const levels: Level[] = [
         {
             id: "lay",
@@ -510,6 +512,7 @@
     let timeLeft = ANSWER_TIMER_MS;
     let answerTimer: ReturnType<typeof setTimeout> | null = null;
     let answerInterval: ReturnType<typeof setInterval> | null = null;
+    let theme: Theme = "dark";
 
     const currentQuestion = () => questions[currentIndex];
 
@@ -607,6 +610,35 @@
     };
     const toggleMenu = () => (menuOpen = !menuOpen);
 
+    const applyTheme = (value: Theme) => {
+        theme = value;
+        if (typeof document !== "undefined") {
+            document.documentElement.dataset.theme = value;
+        }
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("theme", value);
+        }
+    };
+
+    const toggleTheme = () => applyTheme(theme === "dark" ? "light" : "dark");
+
+    onMount(() => {
+        const stored =
+            typeof localStorage !== "undefined"
+                ? localStorage.getItem("theme")
+                : null;
+        const prefersDark =
+            typeof matchMedia !== "undefined" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const next =
+            stored === "light" || stored === "dark"
+                ? stored
+                : prefersDark
+                  ? "dark"
+                  : "light";
+        applyTheme(next);
+    });
+
     onDestroy(() => clearAnswerTimer());
 </script>
 
@@ -617,7 +649,9 @@
 
     <MobileMenu
         {menuOpen}
-        toggleMenu={toggleMenu}
+        {toggleMenu}
+        {theme}
+        {toggleTheme}
         title={t("profile")}
         username={t("guestName")}
         levelLabel={t("score")}
@@ -625,11 +659,12 @@
         accountLabel={t("account")}
         loginLabel={t("login")}
         guestPrefLabel={t("guestPref")}
+        styleLabel="Theme"
         languageLabel={t("language")}
         {languages}
         {locale}
         {flags}
-        selectLanguage={selectLanguage}
+        {selectLanguage}
     />
 
     <Hero
@@ -649,13 +684,16 @@
             accountLabel={t("account")}
             loginLabel={t("login")}
             guestPrefLabel={t("guestPref")}
+            styleLabel="Theme"
             languageLabel={t("language")}
             {languages}
             {locale}
             {flags}
             {menuOpen}
-            toggleMenu={toggleMenu}
-            selectLanguage={selectLanguage}
+            {toggleMenu}
+            {theme}
+            {toggleTheme}
+            {selectLanguage}
         />
     </Hero>
 
@@ -669,7 +707,7 @@
         {completed}
         {timeLeft}
         answerDuration={ANSWER_TIMER_MS}
-        currentIndex={currentIndex}
+        {currentIndex}
         totalQuestions={questions.length}
         {t}
         answeredCorrectly={!!answeredCorrectly()}
@@ -711,19 +749,19 @@
     }
 
     .glow.gold {
-        background: rgba(198, 167, 96, 0.35);
+        background: var(--glow-gold);
         top: -140px;
         left: -120px;
     }
 
     .glow.purple {
-        background: rgba(77, 94, 136, 0.26);
+        background: var(--glow-purple);
         top: 120px;
         right: -160px;
     }
 
     .glow.crimson {
-        background: rgba(127, 83, 74, 0.22);
+        background: var(--glow-crimson);
         bottom: -160px;
         left: 28%;
     }

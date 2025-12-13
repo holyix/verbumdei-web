@@ -37,12 +37,8 @@
         padding: 1.5rem;
         border: 1px solid var(--outline-soft);
         border-radius: 18px;
-        background: linear-gradient(
-            135deg,
-            rgba(18, 26, 52, 0.95),
-            rgba(18, 24, 41, 0.9)
-        );
-        box-shadow: 0 18px 40px rgba(6, 10, 25, 0.45);
+        background: linear-gradient(135deg, var(--panel-veil-1), var(--panel-veil-2));
+        box-shadow: 0 18px 40px var(--shadow-soft);
     }
 
     .hero-text h1 {
@@ -50,7 +46,7 @@
         font-family: var(--font-display);
         font-size: clamp(1.8rem, 2.4vw, 2.6rem);
         letter-spacing: -0.02em;
-        color: #f5f7ff;
+        color: var(--text);
     }
 
     .hero-text .lede {
@@ -65,7 +61,7 @@
         letter-spacing: 0.16em;
         font-size: 0.78rem;
         margin: 0;
-        color: #f2d28d;
+        color: var(--accent);
     }
 
     .progress {
@@ -78,14 +74,14 @@
     .progress-top {
         display: flex;
         justify-content: space-between;
-        color: #d7deee;
+        color: var(--text-subtle);
         font-size: 0.95rem;
     }
 
     .progress-stage {
-        background: rgba(242, 210, 141, 0.12);
-        border: 1px solid rgba(242, 210, 141, 0.35);
-        color: #f9e8c4;
+        background: var(--accent-soft);
+        border: 1px solid var(--outline-soft);
+        color: var(--accent);
         padding: 0.25rem 0.65rem;
         border-radius: 999px;
         font-weight: 700;
@@ -95,16 +91,16 @@
     .progress-track {
         height: 10px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--surface-strong);
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--outline-soft);
     }
 
     .progress-fill {
         height: 100%;
         border-radius: 999px;
         background: linear-gradient(90deg, var(--accent), var(--accent-strong));
-        box-shadow: 0 0 12px rgba(199, 164, 87, 0.5);
+        box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 50%, transparent);
     }
 
     @media (max-width: 960px) {

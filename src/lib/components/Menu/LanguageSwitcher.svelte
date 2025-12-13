@@ -27,9 +27,9 @@
     }
 
     button {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.03);
-        color: #f7f8ff;
+        border: 1px solid var(--outline-soft);
+        background: var(--surface-soft);
+        color: var(--text);
         border-radius: 10px;
         padding: 0.55rem 0.65rem;
         display: grid;
@@ -42,17 +42,13 @@
     }
 
     button:hover {
-        border-color: rgba(242, 210, 141, 0.6);
+        border-color: var(--accent);
     }
 
     button.active {
-        border-color: rgba(199, 164, 87, 0.9);
-        background: linear-gradient(
-            135deg,
-            rgba(199, 164, 87, 0.12),
-            rgba(84, 104, 146, 0.1)
-        );
-        box-shadow: 0 10px 20px rgba(12, 18, 36, 0.45);
+        border-color: var(--accent);
+        background: linear-gradient(135deg, var(--accent-soft), var(--surface-soft));
+        box-shadow: 0 10px 20px var(--shadow-soft);
     }
 
     .flag {
@@ -60,7 +56,7 @@
     }
 
     .lang-code {
-        color: #d3ddf2;
+        color: var(--text-subtle);
         font-weight: 800;
         letter-spacing: 0.08em;
     }

@@ -1,37 +1,100 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap");
 
 :root {
+    --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+    --font-display: "Playfair Display", "DM Sans", serif;
+
+    /* dark (default) */
     --bg: #0c1224;
+    --bg-spot-1: rgba(198, 167, 96, 0.18);
+    --bg-spot-2: rgba(104, 132, 170, 0.2);
+    --bg-spot-3: rgba(127, 83, 74, 0.16);
     --surface: #0d1326;
     --surface-soft: rgba(255, 255, 255, 0.04);
     --surface-strong: rgba(255, 255, 255, 0.08);
+    --panel-veil-1: rgba(18, 26, 52, 0.95);
+    --panel-veil-2: rgba(18, 24, 41, 0.9);
+    --card-veil-1: rgba(11, 17, 35, 0.88);
+    --card-veil-2: rgba(12, 20, 40, 0.92);
+    --scene-veil-1: rgba(12, 18, 36, 0.5);
+    --scene-veil-2: rgba(12, 18, 36, 0.75);
+    --scene-overlay-1: rgba(12, 18, 36, 0.85);
+    --scene-overlay-2: rgba(12, 18, 36, 0.92);
+    --menu-surface: rgba(10, 14, 31, 0.98);
+    --menu-shadow: rgba(6, 10, 25, 0.7);
+    --shadow-strong: rgba(6, 10, 25, 0.5);
+    --shadow-soft: rgba(12, 18, 36, 0.45);
+    --overlay-backdrop: rgba(8, 12, 26, 0.38);
+    --overlay-spot: rgba(199, 164, 87, 0.12);
+    --glow-gold: rgba(198, 167, 96, 0.35);
+    --glow-purple: rgba(77, 94, 136, 0.26);
+    --glow-crimson: rgba(127, 83, 74, 0.22);
     --text: #e9edf4;
     --text-subtle: #cbd3e6;
+    --text-muted: #b0bad6;
+    --ink-strong: #0d0f1d;
     --accent: #c7a457;
     --accent-strong: #9b7a38;
+    --accent-soft: rgba(242, 210, 141, 0.12);
     --outline-strong: rgba(255, 255, 255, 0.12);
     --outline-soft: rgba(255, 255, 255, 0.08);
     --success: #35d69d;
     --danger: #e95d5d;
-    --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
-    --font-display: "Playfair Display", "DM Sans", serif;
+}
+
+:root[data-theme="light"] {
+    --bg: #f7f8fb;
+    --bg-spot-1: rgba(199, 164, 87, 0.16);
+    --bg-spot-2: rgba(103, 126, 173, 0.12);
+    --bg-spot-3: rgba(209, 139, 128, 0.12);
+    --surface: #ffffff;
+    --surface-soft: rgba(0, 0, 0, 0.03);
+    --surface-strong: rgba(0, 0, 0, 0.08);
+    --panel-veil-1: rgba(255, 255, 255, 0.92);
+    --panel-veil-2: rgba(245, 246, 250, 0.94);
+    --card-veil-1: rgba(255, 255, 255, 0.95);
+    --card-veil-2: rgba(245, 247, 252, 0.98);
+    --scene-veil-1: rgba(255, 255, 255, 0.65);
+    --scene-veil-2: rgba(245, 246, 250, 0.82);
+    --scene-overlay-1: rgba(255, 255, 255, 0.9);
+    --scene-overlay-2: rgba(255, 255, 255, 0.96);
+    --menu-surface: rgba(255, 255, 255, 0.95);
+    --menu-shadow: rgba(15, 23, 42, 0.16);
+    --shadow-strong: rgba(15, 23, 42, 0.18);
+    --shadow-soft: rgba(15, 23, 42, 0.12);
+    --overlay-backdrop: rgba(255, 255, 255, 0.55);
+    --overlay-spot: rgba(199, 164, 87, 0.1);
+    --glow-gold: rgba(199, 164, 87, 0.24);
+    --glow-purple: rgba(103, 126, 173, 0.18);
+    --glow-crimson: rgba(209, 139, 128, 0.16);
+    --text: #0f172a;
+    --text-subtle: #3d4a62;
+    --text-muted: #51607a;
+    --ink-strong: #0f172a;
+    --accent: #c48a2e;
+    --accent-strong: #9c7025;
+    --accent-soft: rgba(196, 138, 46, 0.14);
+    --outline-strong: rgba(15, 23, 42, 0.14);
+    --outline-soft: rgba(15, 23, 42, 0.08);
+    --success: #1fa375;
+    --danger: #d14f4f;
 }
 
 :global(body) {
     margin: 0;
     background: radial-gradient(
             circle at 18% 18%,
-            rgba(198, 167, 96, 0.18),
+            var(--bg-spot-1),
             transparent 32%
         ),
         radial-gradient(
             circle at 82% 12%,
-            rgba(104, 132, 170, 0.2),
+            var(--bg-spot-2),
             transparent 35%
         ),
         radial-gradient(
             circle at 42% 78%,
-            rgba(127, 83, 74, 0.16),
+            var(--bg-spot-3),
             transparent 34%
         ),
         var(--bg);

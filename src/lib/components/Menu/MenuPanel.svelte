@@ -1,5 +1,6 @@
 <script lang="ts">
     import LanguageSwitcher from "./LanguageSwitcher.svelte";
+    import ThemeToggle from "./ThemeToggle.svelte";
     import type { Locale } from "$lib/types";
 
     export let title: string;
@@ -10,8 +11,11 @@
     export let loginLabel: string;
     export let guestPrefLabel: string;
     export let languageLabel: string;
+    export let styleLabel: string;
     export let menuOpen = false;
     export let toggleMenu: () => void;
+    export let theme: "light" | "dark";
+    export let toggleTheme: () => void;
     export let languages: { id: Locale; label: string; name: string }[] = [];
     export let locale: Locale;
     export let flags: Record<Locale, string> = { en: "🇬🇧", es: "🇪🇸", pt: "🇧🇷" };
@@ -43,7 +47,12 @@
                     <div class="menu-section">
                         <div class="menu-label">{accountLabel}</div>
                         <button class="menu-item">{loginLabel}</button>
-                        <button class="menu-item muted">{guestPrefLabel}</button>
+                        <button class="menu-item muted">{guestPrefLabel}</button
+                        >
+                    </div>
+                    <div class="menu-section">
+                        <div class="menu-label">{styleLabel}</div>
+                        <ThemeToggle {theme} toggle={toggleTheme} />
                     </div>
                     <div class="menu-section">
                         <div class="menu-label">{languageLabel}</div>
@@ -85,7 +94,7 @@
     }
 
     .panel-username {
-        color: #f7f8ff;
+        color: var(--text);
         font-weight: 800;
         letter-spacing: 0.02em;
     }
@@ -96,13 +105,14 @@
         align-items: center;
         justify-content: center;
         margin-left: auto;
+        gap: 0.35rem;
     }
 
     .panel-title {
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.8rem;
-        color: #d3ddf2;
+        color: var(--text-subtle);
     }
 
     .stats {
@@ -112,15 +122,15 @@
     }
 
     .stat-label {
-        color: #d3ddf2;
+        color: var(--text-subtle);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.78rem;
     }
 
     .menu-toggle {
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--outline-strong);
+        background: var(--surface-soft);
         border-radius: 12px;
         padding: 0.5rem 0.6rem;
         cursor: pointer;
@@ -132,8 +142,8 @@
 
     .menu-toggle:hover {
         transform: translateY(-1px);
-        border-color: rgba(242, 210, 141, 0.6);
-        box-shadow: 0 8px 18px rgba(15, 20, 45, 0.5);
+        border-color: var(--accent);
+        box-shadow: 0 8px 18px var(--shadow-soft);
     }
 
     .hamburger {
@@ -145,7 +155,7 @@
         display: block;
         width: 20px;
         height: 2px;
-        background: #f7f8ff;
+        background: var(--text);
     }
 
     .menu-dropdown {
@@ -153,10 +163,10 @@
         top: calc(100% + 0.6rem);
         right: 0;
         min-width: 250px;
-        background: rgba(10, 14, 31, 0.98);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--menu-surface);
+        border: 1px solid var(--outline-strong);
         border-radius: 14px;
-        box-shadow: 0 18px 40px rgba(6, 10, 25, 0.7);
+        box-shadow: 0 18px 40px var(--menu-shadow);
         padding: 0.75rem;
         display: grid;
         gap: 0.6rem;
@@ -172,13 +182,13 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.75rem;
-        color: #d3ddf2;
+        color: var(--text-subtle);
     }
 
     .menu-item {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.04);
-        color: #f7f8ff;
+        border: 1px solid var(--outline-soft);
+        background: var(--surface-soft);
+        color: var(--text);
         border-radius: 10px;
         padding: 0.65rem 0.75rem;
         text-align: left;
@@ -188,12 +198,12 @@
     }
 
     .menu-item:hover {
-        border-color: rgba(242, 210, 141, 0.6);
-        box-shadow: 0 12px 22px rgba(15, 20, 45, 0.55);
+        border-color: var(--accent);
+        box-shadow: 0 12px 22px var(--shadow-soft);
     }
 
     .menu-item.muted {
-        color: #c8d0e3;
+        color: var(--text-subtle);
         font-weight: 600;
         border-style: dashed;
     }
