@@ -3,8 +3,10 @@
 :root {
     --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
     --font-display: "Playfair Display", "DM Sans", serif;
+}
 
-    /* dark (default) */
+:root,
+:root[data-theme="dark"] {
     --bg: #0c1224;
     --bg-spot-1: rgba(198, 167, 96, 0.18);
     --bg-spot-2: rgba(104, 132, 170, 0.2);
@@ -80,8 +82,10 @@
     --danger: #d14f4f;
 }
 
-:global(body) {
+html,
+body {
     margin: 0;
+    background-color: var(--bg);
     background: radial-gradient(
             circle at 18% 18%,
             var(--bg-spot-1),

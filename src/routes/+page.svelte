@@ -614,6 +614,7 @@
         theme = value;
         if (typeof document !== "undefined") {
             document.documentElement.dataset.theme = value;
+            document.body.dataset.theme = value;
         }
         if (typeof localStorage !== "undefined") {
             localStorage.setItem("theme", value);
