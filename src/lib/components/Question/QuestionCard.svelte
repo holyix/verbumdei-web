@@ -19,12 +19,103 @@
     export let answerDuration: number;
     export let pauseTimer: () => void;
     export let resumeTimer: () => void;
+    export let onHome: () => void;
+
+    const openShare = async () => {
+        const url = window?.location?.href ?? "/";
+        const text = question.prompt[locale];
+        if (navigator?.share) {
+            navigator
+                .share({
+                    title: "Verbum Quest",
+                    text,
+                    url,
+                })
+                .catch(() => {});
+            return;
+        }
+        if (navigator?.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(url);
+            } catch (_) {
+                /* ignore */
+            }
+        }
+    };
 </script>
 
 <section class="card">
+    <div class="hero-image">
+        <img
+            src={question.image_url ?? "/illustrations/quest-hero.svg"}
+            alt={question.stage[locale]}
+            loading="lazy"
+        />
+    </div>
     <div class="meta">
-        <span class="pill">{question.stage[locale]}</span>
-        <span class="sub">{t("question")} {currentIndex + 1} {t("of")} {totalQuestions}</span>
+        <div class="meta-left">
+            <span class="pill">{question.stage[locale]}</span>
+            <span class="sub">{t("question")} {currentIndex + 1} {t("of")} {totalQuestions}</span>
+        </div>
+        <div class="meta-actions">
+            <button class="icon-link" type="button" on:click={onHome} aria-label="Home" title="Home">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                        d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-5H10v5H5a1 1 0 0 1-1-1z"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </button>
+            <button class="icon-link" type="button" on:click={openShare} aria-label="Share" title="Share">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                        d="M6 14.5v4a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 18.5v-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                    />
+                    <path
+                        d="M12 14.5V6m0 0-3 3m3-3 3 3"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </button>
+            <a
+                class="icon-link"
+                href={`https://www.biblegateway.com/quicksearch/?quicksearch=${encodeURIComponent(question.source ?? question.prompt[locale] ?? "")}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open the Bible"
+                title="Open the Bible"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                        d="M12 6v12M12 6s-2-.9-4-.9H5v11.8h3c2 0 4 .6 4 .6"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    <path
+                        d="M12 6s2-.9 4-.9h3v11.8h-3c-2 0-4 .6-4 .6"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </a>
+        </div>
     </div>
     <h2>{question.prompt[locale]}</h2>
     {#if question.source}
@@ -35,7 +126,7 @@
         {#each question.options as option}
             <button
                 class:selected={selected === option.id}
-                class:correct={revealed && option.correct}
+                class:correct={revealed && option.correct && selected === option.id}
                 class:incorrect={revealed && selected === option.id && !option.correct}
                 on:click={() => onSelect(option.id)}
             >
@@ -112,6 +203,36 @@
         margin-bottom: 0.35rem;
     }
 
+    .meta-left {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .meta-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+    }
+
+    .hero-image {
+        width: 100%;
+        max-height: 220px;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid var(--outline-soft);
+        margin-bottom: 0.85rem;
+        background: var(--surface-soft);
+    }
+
+    .hero-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
     .pill {
         display: inline-flex;
         align-items: center;
@@ -125,6 +246,33 @@
         letter-spacing: 0.08em;
         font-size: 0.82rem;
         font-family: var(--font-sans);
+    }
+
+    .icon-link {
+        all: unset;
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        border: 1px solid var(--outline-soft);
+        background: var(--surface-soft);
+        cursor: pointer;
+        transition:
+            transform 120ms ease,
+            border-color 120ms ease,
+            box-shadow 120ms ease;
+    }
+
+    .icon-link svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .icon-link:hover {
+        transform: translateY(-1px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 18px var(--shadow-soft);
     }
 
     .sub {

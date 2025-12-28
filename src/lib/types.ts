@@ -13,6 +13,7 @@ export type Question = {
     prompt: Record<Locale, string>;
     options: Option[];
     source?: string;
+    image_url?: string;
 };
 
 export type Level = { id: string; label: Record<Locale, string> };

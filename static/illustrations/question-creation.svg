@@ -1,0 +1,24 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Creation scene</title>
+  <desc id="desc">Abstract sunrise over hills</desc>
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f7d7ff"/>
+      <stop offset="100%" stop-color="#c8e7ff"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffd27f"/>
+      <stop offset="100%" stop-color="#ff8a3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#sky)"/>
+  <circle cx="120" cy="120" r="70" fill="url(#sun)" opacity="0.9"/>
+  <path d="M0 280 Q200 220 400 280 T800 280 L800 400 L0 400 Z" fill="#c5e6a1"/>
+  <path d="M0 320 Q220 260 420 320 T800 320 L800 400 L0 400 Z" fill="#9fd38a"/>
+  <path d="M0 360 Q240 300 440 360 T800 360 L800 400 L0 400 Z" fill="#79b96f"/>
+  <g fill="#ffffff" opacity="0.7">
+    <ellipse cx="300" cy="90" rx="70" ry="28"/>
+    <ellipse cx="360" cy="110" rx="50" ry="20"/>
+    <ellipse cx="250" cy="115" rx="55" ry="18"/>
+  </g>
+</svg>
