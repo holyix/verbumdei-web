@@ -363,6 +363,7 @@
             body={t("perfectBody")}
             cta={t("perfectCTA")}
             onRestart={restart}
+            {theme}
         />
     {/if}
 

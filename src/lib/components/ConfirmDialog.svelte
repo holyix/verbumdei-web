@@ -28,7 +28,7 @@
     .backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         z-index: 50;
     }
@@ -42,12 +42,12 @@
         max-width: 280px;
         width: min(280px, 88vw);
         max-height: 240px;
-        background: var(--surface-soft);
+        background: color-mix(in srgb, var(--surface-soft) 92%, #fefaf2);
         color: var(--text);
-        border: 1px solid var(--outline-soft);
+        border: 1px solid color-mix(in srgb, var(--outline-soft) 70%, #d8c9a5);
         border-radius: 12px;
         padding: 0.75rem 0.9rem;
-        box-shadow: 0 10px 20px var(--shadow-soft);
+        box-shadow: 0 14px 28px color-mix(in srgb, rgba(0, 0, 0, 0.45) 80%, transparent);
         z-index: 51;
         display: grid;
         gap: 0.45rem;
