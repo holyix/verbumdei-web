@@ -93,6 +93,8 @@
         clearAnswerTimer();
         if (currentIndex >= questions.length - 1) {
             completed = true;
+        } else {
+            startAnswerTimer();
         }
     };
 
@@ -152,6 +154,7 @@
         revealed = false;
         clearAnswerTimer();
         timeLeft = ANSWER_TIMER_MS;
+        startAnswerTimer();
     };
 
     $: totalQuestions = questions.length;
