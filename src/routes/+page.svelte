@@ -1,10 +1,12 @@
 <script lang="ts">
     import Hero from "$lib/components/Hero/Hero.svelte";
+    import { browser } from "$app/environment";
     import MenuPanel from "$lib/components/Menu/MenuPanel.svelte";
     import MobileMenu from "$lib/components/Menu/MobileMenu.svelte";
     import QuestionCard from "$lib/components/Question/QuestionCard.svelte";
     import VictoryOverlay from "$lib/components/VictoryOverlay/VictoryOverlay.svelte";
-    import type { Level, Locale, Question } from "$lib/types";
+    import ConfirmDialog from "$lib/components/ConfirmDialog.svelte";
+    import type { Level, Locale, Option, Question } from "$lib/types";
     import { onDestroy, onMount } from "svelte";
     export let data: {
         questions: Question[];
@@ -46,6 +48,8 @@
     let currentIndex = 0;
     let selected: string | null = null;
     let revealed = false;
+    let retakes: Record<string, number> = {};
+    let retakeCount = 0;
     let score = 0;
     let completed = false;
     let started = false;
@@ -59,6 +63,7 @@
     let answerTimer: ReturnType<typeof setTimeout> | null = null;
     let answerInterval: ReturnType<typeof setInterval> | null = null;
     let theme: Theme = "dark";
+    let showHomeConfirm = false;
 
     $: {
         if (questions.length && currentIndex > questions.length - 1) {
@@ -71,8 +76,11 @@
             ? questions[Math.min(currentIndex, questions.length - 1)]
             : emptyQuestion;
 
+    let selectedOption: Option | undefined;
     $: selectedOption = currentQuestion.options.find((o) => o.id === selected);
     $: isCorrect = !!selectedOption?.correct;
+    $: retakeCount = retakes[currentQuestion.id] ?? 0;
+    $: retakeAvailable = revealed && !isCorrect && retakeCount < 1 && !completed;
 
     const selectAnswer = (id: string) => {
         if (revealed) return;
@@ -85,8 +93,6 @@
         clearAnswerTimer();
         if (currentIndex >= questions.length - 1) {
             completed = true;
-        } else {
-            startAnswerTimer();
         }
     };
 
@@ -96,6 +102,7 @@
             currentIndex += 1;
             selected = null;
             revealed = false;
+            retakeCount = retakes[currentQuestion.id] ?? 0;
             clearAnswerTimer();
         } else {
             completed = true;
@@ -109,6 +116,7 @@
         revealed = false;
         completed = false;
         score = 0;
+        retakes = {};
         clearAnswerTimer();
     };
 
@@ -120,6 +128,30 @@
     const goHome = () => {
         restart();
         started = false;
+    };
+
+    const confirmHome = () => {
+        if (!browser) return;
+        showHomeConfirm = true;
+    };
+
+    const confirmHomeYes = () => {
+        showHomeConfirm = false;
+        goHome();
+    };
+
+    const confirmHomeNo = () => {
+        showHomeConfirm = false;
+    };
+
+    const retakeQuestion = () => {
+        if (!retakeAvailable) return;
+        const id = currentQuestion.id;
+        retakes = { ...retakes, [id]: (retakes[id] ?? 0) + 1 };
+        selected = null;
+        revealed = false;
+        clearAnswerTimer();
+        timeLeft = ANSWER_TIMER_MS;
     };
 
     $: totalQuestions = questions.length;
@@ -293,6 +325,7 @@
                 {selected}
                 {revealed}
                 {completed}
+                retakeDisabled={!retakeAvailable}
                 {timeLeft}
                 answerDuration={ANSWER_TIMER_MS}
                 {currentIndex}
@@ -301,11 +334,12 @@
                 answeredCorrectly={isCorrect}
                 onSelect={selectAnswer}
                 onNext={nextQuestion}
+                onRetake={retakeQuestion}
                 onRestart={restart}
                 isLastQuestion={currentIndex === questions.length - 1}
                 pauseTimer={pauseAnswerTimer}
                 resumeTimer={resumeAnswerTimer}
-                onHome={goHome}
+                onHome={confirmHome}
                 {theme}
             />
         {/key}
@@ -331,6 +365,16 @@
             onRestart={restart}
         />
     {/if}
+
+    <ConfirmDialog
+        open={showHomeConfirm}
+        title="Reset your progress?"
+        body="Going home will reset your answers and score. Do you want to continue?"
+        confirmLabel="Yes, reset"
+        cancelLabel="Stay here"
+        onConfirm={confirmHomeYes}
+        onCancel={confirmHomeNo}
+    />
 </main>
 
 <style>

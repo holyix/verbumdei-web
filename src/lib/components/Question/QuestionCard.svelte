@@ -9,11 +9,13 @@
     export let selected: string | null;
     export let revealed: boolean;
     export let completed: boolean;
+    export let retakeDisabled: boolean = false;
     export let theme: "light" | "dark";
     export let t: (key: string) => string;
     export let answeredCorrectly: boolean;
     export let onSelect: (id: string) => void;
     export let onNext: () => void;
+    export let onRetake: () => void;
     export let onRestart: () => void;
     export let isLastQuestion: boolean;
     export let timeLeft: number;
@@ -166,16 +168,17 @@
                 >
                     <span class="bullet">{option.id.toUpperCase()}</span>
                     <span class="text">{option.text[locale]}</span>
-                    <span
-                        class={`badge ${revealed ? "" : "placeholder"}`}
-                        class:correct-badge={revealed && option.correct}
-                    >
-                        {#if revealed}
-                            {option.correct ? t("correct") : " "}
-                        {:else}
-                            {t("correct")}
-                        {/if}
-                    </span>
+                    {#if revealed && selected === option.id && option.correct}
+                        <span class="badge correct-badge" aria-label={t("correct")}>
+                            ✓
+                        </span>
+                    {:else if revealed && selected === option.id && !option.correct}
+                        <span class="badge incorrect-badge" aria-label={t("incorrect")}>
+                            ✕
+                        </span>
+                    {:else}
+                        <span class="badge placeholder"></span>
+                    {/if}
                 </button>
             {/each}
         </div>
@@ -211,7 +214,9 @@
 
     <div class="actions">
         {#if !completed}
-            <button class="ghost" on:click={onRestart}>{t("restart")}</button>
+            <button class="ghost" on:click={onRetake} disabled={retakeDisabled}
+                >Retake</button
+            >
             <button class="primary" disabled={!revealed} on:click={onNext}>
                 {isLastQuestion ? t("finish") : t("next")}
             </button>
@@ -494,6 +499,15 @@
     .badge.correct-badge {
         color: var(--success);
         background: transparent;
+        font-size: 1.3rem;
+        font-weight: 900;
+    }
+
+    .badge.incorrect-badge {
+        color: var(--danger);
+        background: transparent;
+        font-size: 1.3rem;
+        font-weight: 900;
     }
 
     .explanation {
