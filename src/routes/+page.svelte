@@ -6,106 +6,31 @@
     import VictoryOverlay from "$lib/components/VictoryOverlay/VictoryOverlay.svelte";
     import type { Level, Locale, Question } from "$lib/types";
     import { onDestroy, onMount } from "svelte";
-    export let data: { questions: Question[] };
-    let questions: Question[] = data.questions ?? [];
-
-    const uiText: Record<Locale, Record<string, string>> = {
-        en: {
-            eyebrow: "Verbum Quest · Mock Quiz",
-            title: "Journey through the Word",
-            subtitle:
-                "Learn God’s Word by playing a quiz through the History of Salvation.",
-            score: "Level",
-            question: "Question",
-            of: "of",
-            source: "Source",
-            correct: "Correct",
-            correctMsg: "You chose wisely.",
-            incorrectMsg: "Not quite.",
-            restart: "Restart",
-            next: "Next",
-            finish: "Finish",
-            playAgain: "Play again",
-            start: "Start",
-            welcomeTitle: "Welcome to Verbum Quest",
-            welcomeBody:
-                "Journey through the key moments of Salvation History — from Creation and the Covenants, through the Exodus and the Kingdom, to Christ and the life of the Church. This is a short demo you can play immediately. Create an account to unlock the full journey and save your progress as you advance.",
-            loginCta: "Login / Sign up",
-            profile: "Profile",
-            account: "Account",
-            login: "Login / Sign up",
-            guestPref: "Prefer to stay guest",
-            language: "Language",
-            guestName: "Guest pilgrim",
-            perfectTitle: "Perfect pilgrimage!",
-            perfectBody:
-                "You answered every question. A moment of grace awaits.",
-            perfectCTA: "Spread the Good News!",
-        },
-        es: {
-            eyebrow: "Verbum Quest · Quiz de prueba",
-            title: "Peregrina por la Palabra",
-            subtitle:
-                "Aprende la Palabra de Dios jugando un quiz a través de la Historia de la Salvación.",
-            score: "Nivel",
-            question: "Pregunta",
-            of: "de",
-            source: "Fuente",
-            correct: "Correcta",
-            correctMsg: "Elegiste bien.",
-            incorrectMsg: "No del todo.",
-            restart: "Reiniciar",
-            next: "Siguiente",
-            finish: "Terminar",
-            playAgain: "Jugar de nuevo",
-            start: "Comenzar",
-            welcomeTitle: "Bienvenido a Verbum Quest",
-            welcomeBody:
-                "Recorre los momentos clave de la Historia de la Salvación — desde la Creación y las Alianzas, pasando por el Éxodo y el Reino, hasta Cristo y la vida de la Iglesia. Esta es una demo breve que puedes jugar de inmediato. Crea una cuenta para desbloquear la experiencia completa y guardar tu progreso.",
-            loginCta: "Iniciar sesión / Registrarse",
-            profile: "Perfil",
-            account: "Cuenta",
-            login: "Iniciar sesión / Registrarse",
-            guestPref: "Prefiero seguir como invitado",
-            language: "Idioma",
-            guestName: "Peregrino invitado",
-            perfectTitle: "Peregrinación perfecta",
-            perfectBody:
-                "Respondiste todo correcto. Te aguarda un momento de gracia.",
-            perfectCTA: "¡Anuncia la Buena Nueva!",
-        },
-        pt: {
-            eyebrow: "Verbum Quest · Quiz de teste",
-            title: "Caminho pela Palavra",
-            subtitle:
-                "Aprenda a Palavra de Deus jogando um quiz através da História da Salvação.",
-            score: "Nível",
-            question: "Pergunta",
-            of: "de",
-            source: "Fonte",
-            correct: "Correta",
-            correctMsg: "Você escolheu bem.",
-            incorrectMsg: "Quase lá.",
-            restart: "Reiniciar",
-            next: "Próxima",
-            finish: "Finalizar",
-            playAgain: "Jogar novamente",
-            start: "Começar",
-            welcomeTitle: "Bem-vindo ao Verbum Quest",
-            welcomeBody:
-                "Percorra os momentos centrais da História da Salvação — da Criação e das Alianças, passando pelo Êxodo e pelo Reino, até Cristo e a vida da Igreja. Esta é uma demonstração breve que você pode jogar imediatamente. Crie uma conta para desbloquear a jornada completa e salvar seu progresso.",
-            loginCta: "Entrar / Registrar",
-            profile: "Perfil",
-            account: "Conta",
-            login: "Entrar / Registrar",
-            guestPref: "Prefiro continuar como convidado",
-            language: "Idioma",
-            guestName: "Peregrino convidado",
-            perfectTitle: "Peregrinação perfeita",
-            perfectBody: "Você acertou tudo. Um momento de graça o aguarda.",
-            perfectCTA: "Anuncie a Boa Nova!",
-        },
+    export let data: {
+        questions: Question[];
+        uiText: Record<Locale, Record<string, string>>;
+        locales: { id: Locale; label: string; name: string; flag?: string }[];
+        levels: Level[];
     };
+    let questions: Question[] = data.questions ?? [];
+    let uiText: Record<Locale, Record<string, string>> = data.uiText ?? { en: {}, es: {}, pt: {} };
+    let locales = (data.locales ?? []) as { id: Locale; label: string; name: string; flag?: string }[];
+    if (!locales.length) {
+        locales = [
+            { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
+            { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
+            { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
+        ];
+    }
+    let flags: Record<Locale, string> = Object.fromEntries(
+        locales.map((l) => [l.id, l.flag ?? ""]),
+    ) as Record<Locale, string>;
+    const languages: { id: Locale; label: string; name: string }[] = locales.map((l) => ({
+        id: l.id,
+        label: l.label,
+        name: l.name,
+    }));
+    let levels: Level[] = data.levels ?? [];
 
     const emptyQuestion: Question = {
         id: "",
@@ -114,74 +39,7 @@
         options: [],
     };
 
-    const languages: { id: Locale; label: string; name: string }[] = [
-        { id: "en", label: "EN", name: "English" },
-        { id: "es", label: "ES", name: "Español" },
-        { id: "pt", label: "PT", name: "Português" },
-    ];
-
-    const flags: Record<Locale, string> = {
-        en: "🇬🇧",
-        es: "🇪🇸",
-        pt: "🇧🇷",
-    };
-
     type Theme = "light" | "dark";
-
-    const levels: Level[] = [
-        {
-            id: "lay",
-            label: { en: "Lay Faithful", es: "Laico", pt: "Leigo" },
-        },
-        {
-            id: "convert",
-            label: { en: "Convert", es: "Converso", pt: "Convertido" },
-        },
-        {
-            id: "religious",
-            label: { en: "Religious", es: "Religioso", pt: "Religioso" },
-        },
-        {
-            id: "brother",
-            label: { en: "Brother", es: "Hermano", pt: "Irmão" },
-        },
-        {
-            id: "sister",
-            label: { en: "Sister", es: "Hermana", pt: "Irmã" },
-        },
-        {
-            id: "monk",
-            label: { en: "Monk", es: "Monje", pt: "Monge" },
-        },
-        {
-            id: "priest",
-            label: { en: "Priest", es: "Sacerdote", pt: "Sacerdote" },
-        },
-        {
-            id: "teacher",
-            label: { en: "Teacher", es: "Maestro", pt: "Mestre" },
-        },
-        {
-            id: "pastor",
-            label: { en: "Pastor", es: "Pastor", pt: "Pastor" },
-        },
-        {
-            id: "philosopher",
-            label: { en: "Philosopher", es: "Filósofo", pt: "Filósofo" },
-        },
-        {
-            id: "doctor",
-            label: {
-                en: "Doctor of the Church",
-                es: "Doctor de la Iglesia",
-                pt: "Doutor da Igreja",
-            },
-        },
-        {
-            id: "saint",
-            label: { en: "Saint", es: "Santo", pt: "Santo" },
-        },
-    ];
 
     const ANSWER_TIMER_MS = 12000;
     let locale: Locale = "en";
@@ -270,13 +128,15 @@
             ? Math.round(((currentIndex + 1) / totalQuestions) * 100)
             : 0;
 
-    $: levelIndex = Math.min(
-        levels.length - 1,
-        totalQuestions > 0
-            ? Math.floor((score / totalQuestions) * levels.length)
-            : 0,
-    );
-    $: levelValue = levels[levelIndex].label[locale];
+    $: levelIndex = levels.length
+        ? Math.min(
+              levels.length - 1,
+              totalQuestions > 0
+                  ? Math.floor((score / totalQuestions) * levels.length)
+                  : 0,
+          )
+        : 0;
+    $: levelValue = levels.length ? levels[levelIndex].label[locale] : "";
     const clearAnswerTimer = (reset: boolean = true) => {
         if (answerTimer) {
             clearTimeout(answerTimer);
@@ -315,8 +175,9 @@
         startAnswerTimer(timeLeft);
     };
 
-    let t = (key: string) => uiText[locale][key] ?? key;
-    $: t = (key: string) => uiText[locale][key] ?? key;
+    $: currentTexts = uiText[locale] ?? uiText.en ?? {};
+    let t = (key: string) => currentTexts[key] ?? key;
+    $: t = (key: string) => currentTexts[key] ?? key;
     const selectLanguage = (id: Locale) => {
         locale = id;
         menuOpen = false;
