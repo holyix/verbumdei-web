@@ -197,7 +197,13 @@
 
     const toggleTheme = () => applyTheme(theme === "dark" ? "light" : "dark");
 
+    let isMobile = false;
+
     onMount(() => {
+        const updateIsMobile = () => {
+            isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
+        };
+        updateIsMobile();
         const stored =
             typeof localStorage !== "undefined"
                 ? localStorage.getItem("theme")
@@ -212,12 +218,14 @@
                   ? "dark"
                   : "light";
         applyTheme(next);
+        window.addEventListener("resize", updateIsMobile);
+        return () => window.removeEventListener("resize", updateIsMobile);
     });
 
     onDestroy(() => clearAnswerTimer());
 </script>
 
-<main class="page">
+<main class={`page ${theme === "light" ? "light-theme" : "dark-theme"}`}>
     <div class="glow gold" aria-hidden="true"></div>
     <div class="glow purple" aria-hidden="true"></div>
     <div class="glow crimson" aria-hidden="true"></div>
@@ -242,35 +250,40 @@
         {selectLanguage}
     />
 
-    <Hero
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        subtitle={t("subtitle")}
-        progressLabel={`${t("question")} ${started ? currentIndex + 1 : 0} ${t("of")} ${questions.length}`}
-        progressStage={started ? currentQuestion.stage[locale] : ""}
-        {progressPercent}
-    >
-        <MenuPanel
-            slot="panel"
-            title={t("profile")}
-            username={t("guestName")}
-            levelLabel={t("score")}
-            {levelValue}
-            accountLabel={t("account")}
-            loginLabel={t("login")}
-            guestPrefLabel={t("guestPref")}
-            styleLabel="Theme"
-            languageLabel={t("language")}
-            {languages}
-            {locale}
-            {flags}
-            {menuOpen}
-            {toggleMenu}
+    {#if !(started && isMobile)}
+        <Hero
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            subtitle={t("subtitle")}
+            progressLabel={`${t("question")} ${started ? currentIndex + 1 : 0} ${t("of")} ${questions.length}`}
+            progressStage={started
+                ? currentQuestion.stage[locale]
+                : questions[0]?.stage?.[locale] ?? ""}
+            {progressPercent}
             {theme}
-            {toggleTheme}
-            {selectLanguage}
-        />
-    </Hero>
+        >
+            <MenuPanel
+                slot="panel"
+                title={t("profile")}
+                username={t("guestName")}
+                levelLabel={t("score")}
+                {levelValue}
+                accountLabel={t("account")}
+                loginLabel={t("login")}
+                guestPrefLabel={t("guestPref")}
+                styleLabel="Theme"
+                languageLabel={t("language")}
+                {languages}
+                {locale}
+                {flags}
+                {menuOpen}
+                {toggleMenu}
+                {theme}
+                {toggleTheme}
+                {selectLanguage}
+            />
+        </Hero>
+    {/if}
 
     {#if started}
         {#key currentQuestion.id}
@@ -293,6 +306,7 @@
                 pauseTimer={pauseAnswerTimer}
                 resumeTimer={resumeAnswerTimer}
                 onHome={goHome}
+                {theme}
             />
         {/key}
     {:else}
@@ -327,6 +341,14 @@
         gap: 1.2rem;
         overflow: hidden;
         padding: 12px;
+    }
+
+    .page.light-theme {
+        background: linear-gradient(180deg, #f8f3e7 0%, #f2eadb 100%);
+    }
+
+    .page.dark-theme {
+        background: linear-gradient(180deg, #0f1119 0%, #131827 100%);
     }
 
     .glow {
@@ -364,27 +386,51 @@
         border: 1px solid var(--outline-soft);
         border-radius: 18px;
         background:
-            linear-gradient(
-                180deg,
-                var(--scene-overlay-1),
-                var(--scene-overlay-2)
-            ),
-            url("/illustrations/quest-hero.svg") center/cover,
+            linear-gradient(180deg, rgba(248, 243, 231, 0.9), rgba(234, 215, 188, 0.85)),
+            url("/illustrations/quest-hero-light.svg") center/cover,
             linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2)),
             var(--bg);
         box-shadow: 0 18px 40px var(--shadow-strong);
         display: grid;
         gap: 1rem;
-        min-height: 360px;
+        min-height: 720px;
         align-content: space-between;
         justify-items: center;
+    }
+
+    .page.dark-theme .intro-card {
+        background:
+            linear-gradient(160deg, rgba(18, 26, 52, 0.9), rgba(18, 24, 41, 0.9)),
+            linear-gradient(160deg, rgba(12, 14, 24, 0.6), rgba(18, 20, 32, 0.6)),
+            url("/illustrations/quest-hero.svg") center/cover,
+            var(--bg);
+        color: var(--text);
+    }
+
+    .page.dark-theme .intro-eyebrow {
+        color: var(--accent);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .page.dark-theme .intro-body {
+        color: var(--text-muted);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .page.dark-theme .intro-card h2 {
+        color: var(--text);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+    }
+
+    .page.dark-theme .intro-note .link.disabled {
+        color: var(--text);
     }
 
     .intro-eyebrow {
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-weight: 800;
-        color: var(--text-subtle);
+        color: var(--accent);
         margin: 0;
     }
 
@@ -420,6 +466,13 @@
 
     .intro-note {
         margin: 0;
+    }
+
+    @media (max-width: 640px) {
+        .intro-card {
+            min-height: 820px;
+            padding: 1.8rem;
+        }
     }
 
     .intro-note .link {
