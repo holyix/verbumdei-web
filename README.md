@@ -29,3 +29,11 @@ Create a `.env` file if you need to point the app at an API:
 ```bash
 VITE_API_URL=https://your-api.example.com
 ```
+
+## Backend expectations
+- `GET /v1/questions` (and `/v1/questions/:id`) — quiz content
+- `GET /v1/ui/locales` — language list (id/label/name/flag)
+- `GET /v1/ui/levels` — level list (id + localized labels)
+- `GET /v1/ui/elements` — localized UI copy
+
+The frontend falls back to local defaults if these endpoints are unavailable, but runs best when connected to the Rust API.***
