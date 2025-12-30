@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Placeholder Biblical scene (light)</title>
+  <desc id="desc">Light-tinted version of the Verbum Quest hero scene with softened contrast.</desc>
+  <defs>
+    <linearGradient id="sky-light" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f7f1e3"/>
+      <stop offset="60%" stop-color="#e9dec6"/>
+      <stop offset="100%" stop-color="#d6c7ad"/>
+    </linearGradient>
+    <linearGradient id="sun-light" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fbe2a3" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e4bd6f" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="water-light" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#b7d4e6" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#8fbfda" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="hill-light" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#c5d1b4"/>
+      <stop offset="100%" stop-color="#a7b697"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky-light)"/>
+  <circle cx="160" cy="120" r="90" fill="url(#sun-light)" opacity="0.9"/>
+  <path d="M0 340 Q180 270 320 320 T640 310 T960 260 L960 540 L0 540 Z" fill="#d0d9c8" opacity="0.7"/>
+  <path d="M0 360 Q200 300 380 340 T720 320 T960 300 L960 540 L0 540 Z" fill="url(#hill-light)"/>
+  <path d="M0 410 C160 420 260 440 420 440 S720 410 960 440 L960 540 L0 540 Z" fill="url(#water-light)"/>
+  <path d="M520 260 L560 260 L540 160 Z" fill="#d8b06a" opacity="0.8"/>
+  <path d="M520 260 L540 190 L560 260 Z" fill="#e8c78a" opacity="0.8"/>
+  <rect x="620" y="210" width="10" height="95" fill="#c79d62"/>
+  <rect x="620" y="180" width="10" height="110" fill="#e8c78a"/>
+  <rect x="600" y="210" width="50" height="10" fill="#e8c78a"/>
+  <path d="M140 430 C200 400 300 400 360 430 S520 470 580 440 S760 390 860 430 L860 540 L140 540 Z" fill="#c8d5d4" opacity="0.55"/>
+  <circle cx="740" cy="120" r="22" fill="#f6d27f" opacity="0.65"/>
+  <circle cx="820" cy="90" r="14" fill="#f6d27f" opacity="0.55"/>
+  <circle cx="680" cy="80" r="12" fill="#f6d27f" opacity="0.5"/>
+</svg>

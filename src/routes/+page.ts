@@ -16,6 +16,8 @@ const ensureLocales = (value: Record<string, string> | null | undefined) => {
 
 const mapQuestion = (raw: any, idx: number): Question => {
     const image_url = typeof raw?.image_url === "string" ? raw.image_url : undefined;
+    const image_url_light = typeof raw?.image_url_light === "string" ? raw.image_url_light : undefined;
+    const image_url_dark = typeof raw?.image_url_dark === "string" ? raw.image_url_dark : undefined;
 
     const options = Array.isArray(raw.options)
         ? raw.options.map((opt: any, i: number) => ({
@@ -33,13 +35,23 @@ const mapQuestion = (raw: any, idx: number): Question => {
             {} as Record<Locale, string>,
         );
 
+    const baseImage = image_url ?? "/illustrations/quest-hero.svg";
+    const lightImage =
+        image_url_light ??
+        (baseImage.includes("quest-hero")
+            ? "/illustrations/quest-hero-light.svg"
+            : baseImage);
+    const darkImage = image_url_dark ?? baseImage;
+
     return {
         id: raw?.id ?? `q-${idx}`,
         stage: ensureLocales(stageLabel),
         prompt: ensureLocales(raw?.prompt),
         options,
         source: raw?.source,
-        image_url: image_url ?? "/illustrations/quest-hero.svg",
+        image_url: baseImage,
+        image_url_light: lightImage,
+        image_url_dark: darkImage,
     };
 };
 

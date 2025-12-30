@@ -3,11 +3,12 @@
     export let body: string;
     export let cta: string;
     export let onRestart: () => void;
+    export let theme: "light" | "dark" = "dark";
     export let imageSrc = "/illustrations/divine-mercy.png";
 </script>
 
-<div class="victory-overlay" role="dialog" aria-modal="true">
-    <div class="victory-card">
+<div class={`victory-overlay ${theme}`} role="dialog" aria-modal="true">
+    <div class={`victory-card ${theme}`}>
         <div class="victory-art">
             <img src={imageSrc} alt="Christ of Divine Mercy" loading="lazy" />
             <div class="cherub cherub-left">😇</div>
@@ -39,6 +40,17 @@
         animation: overlayFade 3000ms ease;
     }
 
+    .victory-overlay.light {
+        background:
+            radial-gradient(
+                circle at 40% 20%,
+                color-mix(in srgb, #f7ecd5 70%, var(--overlay-spot)),
+                color-mix(in srgb, #f0e2c8 70%, transparent)
+            ),
+            linear-gradient(180deg, rgba(248, 243, 231, 0.9), rgba(234, 215, 188, 0.85)),
+            var(--overlay-backdrop);
+    }
+
     .victory-card {
         display: grid;
         gap: 1rem;
@@ -51,6 +63,20 @@
         box-shadow: 0 24px 50px var(--shadow-strong);
         animation: cardFloat 680ms ease 120ms both;
         box-sizing: border-box;
+    }
+
+    .victory-card.light {
+        background:
+            linear-gradient(180deg, rgba(248, 243, 231, 0.92), rgba(234, 215, 188, 0.9)),
+            linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2)),
+            var(--surface);
+        border-color: color-mix(in srgb, var(--accent-soft) 75%, #d9c9a5);
+        box-shadow: 0 20px 38px color-mix(in srgb, rgba(0, 0, 0, 0.3) 80%, transparent);
+    }
+
+    .victory-card.dark {
+        background: color-mix(in srgb, var(--surface) 90%, #0f1119);
+        border-color: var(--accent-soft);
     }
 
     .victory-art {

@@ -5,9 +5,10 @@
     export let progressLabel: string;
     export let progressStage: string;
     export let progressPercent: number;
+    export let theme: "light" | "dark" = "dark";
 </script>
 
-<header class="hero">
+<header class={`hero ${theme === "light" ? "light" : "dark"}`}>
     <div class="hero-text">
         <p class="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
@@ -19,7 +20,10 @@
                 <span class="progress-stage">{progressStage}</span>
             </div>
             <div class="progress-track">
-                <div class="progress-fill" style={`width: ${progressPercent}%`}></div>
+                <div
+                    class="progress-fill"
+                    style={`width: ${progressPercent}%`}
+                ></div>
             </div>
         </div>
     </div>
@@ -37,8 +41,21 @@
         padding: 1.5rem;
         border: 1px solid var(--outline-soft);
         border-radius: 18px;
-        background: linear-gradient(135deg, var(--panel-veil-1), var(--panel-veil-2));
+        background: linear-gradient(
+            135deg,
+            var(--panel-veil-1),
+            var(--panel-veil-2)
+        );
         box-shadow: 0 18px 40px var(--shadow-soft);
+    }
+
+    .hero.light {
+        background: linear-gradient(
+                135deg,
+                rgba(248, 243, 231, 0.92),
+                rgba(229, 212, 185, 0.88)
+            ),
+            linear-gradient(135deg, var(--panel-veil-1), var(--panel-veil-2));
     }
 
     .hero-text h1 {

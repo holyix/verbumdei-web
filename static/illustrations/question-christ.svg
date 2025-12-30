@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Light placeholder biblical scene</title>
+  <desc id="desc">A bright stylized landscape for Verbum Quest showing hills, water, sun rays, and a cross.</desc>
+  <defs>
+    <linearGradient id="sky-light" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f5efe0"/>
+      <stop offset="60%" stop-color="#e2d6bd"/>
+      <stop offset="100%" stop-color="#d4c6aa"/>
+    </linearGradient>
+    <linearGradient id="sun-light" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f9df9f" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e4b967" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="water-light" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#a2c9dd" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#7db2d0" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="hill-light" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#b8c5a9"/>
+      <stop offset="100%" stop-color="#9daf92"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky-light)"/>
+  <ellipse cx="760" cy="120" rx="120" ry="90" fill="url(#sun-light)" opacity="0.9"/>
+  <path d="M0 320 Q160 260 320 300 T640 280 T960 320 L960 540 L0 540 Z" fill="url(#hill-light)"/>
+  <path d="M0 360 Q220 330 440 350 T960 360 L960 540 L0 540 Z" fill="#c9d7c0"/>
+  <path d="M0 390 Q200 410 400 395 T960 420 L960 540 L0 540 Z" fill="url(#water-light)"/>
+  <rect x="468" y="158" width="16" height="180" rx="2" fill="#9b7d4d"/>
+  <rect x="420" y="210" width="112" height="16" rx="2" fill="#9b7d4d"/>
+  <path d="M0 180 Q120 150 240 180 T480 190 T720 170 T960 190 L960 320 L0 320 Z" fill="rgba(255,255,255,0.38)"/>
+</svg>

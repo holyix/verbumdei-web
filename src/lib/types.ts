@@ -14,6 +14,8 @@ export type Question = {
     options: Option[];
     source?: string;
     image_url?: string;
+    image_url_light?: string;
+    image_url_dark?: string;
 };
 
 export type Level = { id: string; label: Record<Locale, string> };

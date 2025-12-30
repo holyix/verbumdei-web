@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { fade } from "svelte/transition";
     import LanguageSwitcher from "./LanguageSwitcher.svelte";
     import ThemeToggle from "./ThemeToggle.svelte";
     import type { Locale } from "$lib/types";
@@ -20,6 +21,24 @@
     export let locale: Locale;
     export let flags: Record<Locale, string> = { en: "🇬🇧", es: "🇪🇸", pt: "🇧🇷" };
     export let selectLanguage: (id: Locale) => void;
+
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const closeMenu = () => {
+        if (menuOpen) toggleMenu();
+    };
+
+    const scheduleClose = () => {
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => closeMenu(), 160);
+    };
+
+    const cancelClose = () => {
+        if (closeTimer) {
+            clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+    };
 </script>
 
 <div class="hero-panel">
@@ -43,7 +62,13 @@
                 </span>
             </button>
             {#if menuOpen}
-                <div class="menu-dropdown" id="user-menu">
+                <div
+                    class="menu-dropdown"
+                    id="user-menu"
+                    on:mouseleave={scheduleClose}
+                    on:mouseenter={cancelClose}
+                    transition:fade={{ duration: 140 }}
+                >
                     <div class="menu-section">
                         <div class="menu-label">{accountLabel}</div>
                         <button class="menu-item">{loginLabel}</button>
