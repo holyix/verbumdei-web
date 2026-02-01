@@ -1,5 +1,6 @@
 <script lang="ts">
     import { fade } from "svelte/transition";
+    import { goto } from "$app/navigation";
     import LanguageSwitcher from "./LanguageSwitcher.svelte";
     import ThemeToggle from "./ThemeToggle.svelte";
     import type { Locale } from "$lib/types";
@@ -23,6 +24,10 @@
     export let selectLanguage: (id: Locale) => void;
 
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const goToWelcome = () => {
+        goto("/welcome");
+    };
 
     const closeMenu = () => {
         if (menuOpen) toggleMenu();
@@ -70,18 +75,24 @@
                     transition:fade={{ duration: 140 }}
                 >
                     <div class="menu-section">
+                        <div class="menu-label">{styleLabel}</div>
+                        <ThemeToggle {theme} toggle={toggleTheme} />
+                    </div>
+                    <div class="menu-section">
                         <div class="menu-label">{accountLabel}</div>
                         <button class="menu-item">{loginLabel}</button>
                         <button class="menu-item muted">{guestPrefLabel}</button
                         >
                     </div>
-                    <div class="menu-section">
-                        <div class="menu-label">{styleLabel}</div>
-                        <ThemeToggle {theme} toggle={toggleTheme} />
-                    </div>
-                    <div class="menu-section">
-                        <div class="menu-label">{languageLabel}</div>
-                        <LanguageSwitcher
+                <div class="menu-section">
+                    <div class="menu-label">Explore</div>
+                    <button class="menu-item" type="button" on:click={goToWelcome}>
+                        Welcome intro
+                    </button>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-label">{languageLabel}</div>
+                    <LanguageSwitcher
                             {languages}
                             {locale}
                             {flags}
@@ -220,6 +231,8 @@
         font-weight: 700;
         cursor: pointer;
         transition: all 120ms ease;
+        text-decoration: none;
+        display: block;
     }
 
     .menu-item:hover {

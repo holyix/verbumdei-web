@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
     import LanguageSwitcher from "./LanguageSwitcher.svelte";
     import ThemeToggle from "./ThemeToggle.svelte";
     import type { Locale } from "$lib/types";
@@ -20,6 +21,10 @@
     export let selectLanguage: (id: Locale) => void;
     export let theme: "light" | "dark";
     export let toggleTheme: () => void;
+
+    const goToWelcome = () => {
+        goto("/welcome");
+    };
 </script>
 
 <div class="mobile-menu" aria-label="User menu">
@@ -47,13 +52,19 @@
                     <div class="panel-username">{levelValue}</div>
                 </div>
                 <div class="menu-section">
+                    <div class="menu-label">{styleLabel}</div>
+                    <ThemeToggle {theme} toggle={toggleTheme} />
+                </div>
+                <div class="menu-section">
                     <div class="menu-label">{accountLabel}</div>
                     <button class="menu-item">{loginLabel}</button>
                     <button class="menu-item muted">{guestPrefLabel}</button>
                 </div>
                 <div class="menu-section">
-                    <div class="menu-label">{styleLabel}</div>
-                    <ThemeToggle {theme} toggle={toggleTheme} />
+                    <div class="menu-label">Explore</div>
+                    <button class="menu-item" type="button" on:click={goToWelcome}>
+                        Welcome intro
+                    </button>
                 </div>
                 <div class="menu-section">
                     <div class="menu-label">{languageLabel}</div>
@@ -197,6 +208,8 @@
         font-weight: 700;
         cursor: pointer;
         transition: all 120ms ease;
+        text-decoration: none;
+        display: block;
     }
 
     .menu-item.muted {
