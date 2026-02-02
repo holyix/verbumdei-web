@@ -6,6 +6,7 @@
     import type { Level, Locale, Question } from "$lib/types";
     import { onMount } from "svelte";
     import { homeUiText } from "./content";
+    import { eras } from "$lib/common/eras";
 
     export let data: {
         questions: Question[];
@@ -102,84 +103,6 @@
         markVisited();
         goto(`/quiz?category=${id}`);
     };
-
-    const categories = [
-        {
-            id: "creation",
-            title: {
-                en: "Creation",
-                es: "Creación",
-                pt: "Criação",
-                sv: "Skapelsen",
-            },
-            body: {
-                en: "Origins, covenant beginnings, and the first promises.",
-                es: "Orígenes, inicios del pacto y las primeras promesas.",
-                pt: "Origens, início da aliança e as primeiras promessas.",
-                sv: "Ursprung, förbundets början och de första löftena.",
-            },
-        },
-        {
-            id: "exodus",
-            title: {
-                en: "Exodus",
-                es: "Éxodo",
-                pt: "Êxodo",
-                sv: "Uttåget",
-            },
-            body: {
-                en: "Liberation, wilderness faith, and God’s covenant.",
-                es: "Liberación, fe en el desierto y el pacto de Dios.",
-                pt: "Libertação, fé no deserto e a aliança de Deus.",
-                sv: "Befrielse, tro i öknen och Guds förbund.",
-            },
-        },
-        {
-            id: "kings",
-            title: {
-                en: "Kings",
-                es: "Reyes",
-                pt: "Reis",
-                sv: "Kungarna",
-            },
-            body: {
-                en: "Rise and fall of Israel’s kingdom and its leaders.",
-                es: "Ascenso y caída del reino de Israel y sus líderes.",
-                pt: "Ascensão e queda do reino de Israel e seus líderes.",
-                sv: "Israels rikes uppgång och fall och dess ledare.",
-            },
-        },
-        {
-            id: "christ",
-            title: {
-                en: "Christ",
-                es: "Cristo",
-                pt: "Cristo",
-                sv: "Kristus",
-            },
-            body: {
-                en: "Life, teachings, and redemption through Jesus.",
-                es: "Vida, enseñanzas y redención en Jesús.",
-                pt: "Vida, ensinamentos e redenção em Jesus.",
-                sv: "Jesu liv, undervisning och frälsning.",
-            },
-        },
-        {
-            id: "church",
-            title: {
-                en: "Church",
-                es: "Iglesia",
-                pt: "Igreja",
-                sv: "Kyrkan",
-            },
-            body: {
-                en: "The early church, apostles, and mission.",
-                es: "La iglesia primitiva, los apóstoles y la misión.",
-                pt: "A igreja primitiva, os apóstolos e a missão.",
-                sv: "Den tidiga kyrkan, apostlarna och missionen.",
-            },
-        },
-    ];
 
     const landingText = {
         en: {
@@ -359,7 +282,7 @@
                     {landing.startTimeline}
                 </button>
             </article>
-            {#each categories as category}
+            {#each eras as category}
                 <article class="category-card">
                     <div>
                         <p class="category-title">

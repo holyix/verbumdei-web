@@ -1,7 +1,8 @@
 import type { Locale } from "$lib/types";
+import { erasById, type EraId } from "$lib/common/eras";
 
 export type LocalizedStage = {
-    id: string;
+    id: EraId;
     title: Record<Locale, string>;
     era: Record<Locale, string>;
     summary: Record<Locale, string>;
@@ -36,125 +37,31 @@ export const timelineHero: Record<
     },
 };
 
-export const stages: LocalizedStage[] = [
-    {
-        id: "creation",
-        title: {
-            en: "Creation",
-            es: "Creación",
-            pt: "Criação",
-            sv: "Skapelsen",
-        },
-        era: {
-            en: "Genesis",
-            es: "Génesis",
-            pt: "Gênesis",
-            sv: "Första Mosebok",
-        },
-        summary: {
-            en: "Origins, covenant beginnings, and the first promises.",
-            es: "Orígenes, inicios del pacto y las primeras promesas.",
-            pt: "Origens, início da aliança e as primeiras promessas.",
-            sv: "Ursprung, förbundets början och de första löftena.",
-        },
-        progress: 0.0,
-        offset: 0,
-        side: "left",
-    },
-    {
-        id: "exodus",
-        title: {
-            en: "Exodus",
-            es: "Éxodo",
-            pt: "Êxodo",
-            sv: "Uttåget",
-        },
-        era: {
-            en: "Deliverance",
-            es: "Liberación",
-            pt: "Libertação",
-            sv: "Befrielse",
-        },
-        summary: {
-            en: "Liberation, wilderness faith, and a people formed by God.",
-            es: "Liberación, fe en el desierto y un pueblo formado por Dios.",
-            pt: "Libertação, fé no deserto e um povo formado por Deus.",
-            sv: "Befrielse, tro i öknen och ett folk format av Gud.",
-        },
-        progress: 0.35,
-        offset: 0,
-        side: "right",
-    },
-    {
-        id: "kings",
-        title: {
-            en: "Kings",
-            es: "Reyes",
-            pt: "Reis",
-            sv: "Kungarna",
-        },
-        era: {
-            en: "Kingdom",
-            es: "Reino",
-            pt: "Reino",
-            sv: "Riket",
-        },
-        summary: {
-            en: "Rise and fall of Israel’s kingdom and its leaders.",
-            es: "Ascenso y caída del reino de Israel y sus líderes.",
-            pt: "Ascensão e queda do reino de Israel e seus líderes.",
-            sv: "Israels rikes uppgång och fall och dess ledare.",
-        },
-        progress: 0.75,
-        offset: 0,
-        side: "right",
-    },
-    {
-        id: "christ",
-        title: {
-            en: "Christ",
-            es: "Cristo",
-            pt: "Cristo",
-            sv: "Kristus",
-        },
-        era: {
-            en: "Gospels",
-            es: "Evangelios",
-            pt: "Evangelhos",
-            sv: "Evangelierna",
-        },
-        summary: {
-            en: "Life, teachings, and redemption through Jesus.",
-            es: "Vida, enseñanzas y redención por medio de Jesús.",
-            pt: "Vida, ensinamentos e redenção por meio de Jesus.",
-            sv: "Jesu liv, undervisning och frälsning.",
-        },
-        progress: 0.0,
-        offset: 0,
-        side: "left",
-    },
-    {
-        id: "church",
-        title: {
-            en: "Church",
-            es: "Iglesia",
-            pt: "Igreja",
-            sv: "Kyrkan",
-        },
-        era: {
-            en: "Acts & Letters",
-            es: "Hechos y Cartas",
-            pt: "Atos e Cartas",
-            sv: "Apostlagärningarna och breven",
-        },
-        summary: {
-            en: "The early church, apostles, and mission.",
-            es: "La iglesia primitiva, los apóstoles y la misión.",
-            pt: "A igreja primitiva, os apóstolos e a missão.",
-            sv: "Den tidiga kyrkan, apostlarna och missionen.",
-        },
-        progress: 1.0,
-        offset: 0,
-        side: "left",
-    },
+const stageLayout: Record<
+    EraId,
+    { progress: number; offset: number; side: "left" | "right" }
+> = {
+    creation: { progress: 0.0, offset: 0, side: "left" },
+    exodus: { progress: 0.35, offset: 0, side: "right" },
+    kings: { progress: 0.75, offset: 0, side: "right" },
+    christ: { progress: 0.0, offset: 0, side: "left" },
+    church: { progress: 1.0, offset: 0, side: "left" },
+};
+
+const stageOrder: EraId[] = [
+    "creation",
+    "exodus",
+    "kings",
+    "christ",
+    "church",
 ];
+
+export const stages: LocalizedStage[] = stageOrder.map((id) => ({
+    id,
+    title: erasById[id].title,
+    era: erasById[id].era,
+    summary: erasById[id].body,
+    progress: stageLayout[id].progress,
+    offset: stageLayout[id].offset,
+    side: stageLayout[id].side,
+}));
