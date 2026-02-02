@@ -14,13 +14,20 @@
     export let guestPrefLabel: string;
     export let languageLabel: string;
     export let styleLabel: string;
+    export let exploreLabel: string;
+    export let welcomeIntroLabel: string;
     export let menuOpen = false;
     export let toggleMenu: () => void;
     export let theme: "light" | "dark";
     export let toggleTheme: () => void;
     export let languages: { id: Locale; label: string; name: string }[] = [];
     export let locale: Locale;
-    export let flags: Record<Locale, string> = { en: "🇬🇧", es: "🇪🇸", pt: "🇧🇷" };
+    export let flags: Record<Locale, string> = {
+        en: "🇬🇧",
+        es: "🇪🇸",
+        pt: "🇧🇷",
+        sv: "🇸🇪",
+    };
     export let selectLanguage: (id: Locale) => void;
 
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -85,9 +92,9 @@
                         >
                     </div>
                 <div class="menu-section">
-                    <div class="menu-label">Explore</div>
+                    <div class="menu-label">{exploreLabel}</div>
                     <button class="menu-item" type="button" on:click={goToWelcome}>
-                        Welcome intro
+                        {welcomeIntroLabel}
                     </button>
                 </div>
                 <div class="menu-section">

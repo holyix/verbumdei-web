@@ -3,10 +3,25 @@
     import { browser } from "$app/environment";
     import { onMount } from "svelte";
     import StickFigure from "$lib/components/StickFigure/StickFigure.svelte";
+    import type { Locale } from "$lib/types";
+    import { welcomeText } from "./content";
 
     type Theme = "light" | "dark";
     let theme: Theme = "dark";
     let showWelcomeAlways = false;
+    let locale: Locale = "en";
+
+    const locales: {
+        id: Locale;
+        label: string;
+        name: string;
+        flag?: string;
+    }[] = [
+        { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
+        { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
+        { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
+        { id: "sv", label: "SV", name: "Svenska", flag: "🇸🇪" },
+    ];
 
     const applyTheme = (value: Theme) => {
         theme = value;
@@ -43,6 +58,13 @@
         }
     };
 
+    const selectLanguage = (id: Locale) => {
+        locale = id;
+        if (browser) {
+            localStorage.setItem("vd_locale", id);
+        }
+    };
+
     onMount(() => {
         if (!browser) return;
         const stored = localStorage.getItem("theme");
@@ -59,7 +81,13 @@
 
         showWelcomeAlways =
             localStorage.getItem("vd_show_welcome_always") === "1";
+        const storedLocale = localStorage.getItem("vd_locale");
+        if (storedLocale && locales.some((item) => item.id === storedLocale)) {
+            locale = storedLocale as Locale;
+        }
     });
+
+    $: copy = welcomeText[locale] ?? welcomeText.en;
 </script>
 
 <main
@@ -70,8 +98,8 @@
     <div class="glow crimson" aria-hidden="true"></div>
 
     <section class="intro-card">
-        <p class="intro-eyebrow">Welcome</p>
-        <h2>Welcome to Verbum Quest</h2>
+        <p class="intro-eyebrow">{copy.eyebrow}</p>
+        <h2>{copy.title}</h2>
         <StickFigure
             className="welcome-figure"
             overall={100}
@@ -79,18 +107,24 @@
             torsoTop={39}
             armsTop={47}
         />
-        <p class="intro-body">
-            We crafted this path with care—take your time, explore, and let each
-            question guide you gently forward. We hope you enjoy learning as
-            much as we enjoyed building it for you.
-        </p>
-        <p class="intro-body">
-            When you're ready, step into the main experience. Your progress and
-            choices will feel at home here.
-        </p>
-        <button class="primary soft" on:click={handleStart}
-            >Start your journey!</button
-        >
+        <p class="language-prompt">{copy.languagePrompt}</p>
+        <div class="language-row" role="group" aria-label={copy.languageLabel}>
+            {#each locales as lang}
+                <button
+                    class:active={locale === lang.id}
+                    type="button"
+                    on:click={() => selectLanguage(lang.id)}
+                    aria-pressed={locale === lang.id}
+                    title={lang.name}
+                >
+                    <span class="flag">{lang.flag}</span>
+                    <span class="label">{lang.label}</span>
+                </button>
+            {/each}
+        </div>
+        <p class="intro-body">{copy.bodyOne}</p>
+        <p class="intro-body">{copy.bodyTwo}</p>
+        <button class="primary soft" on:click={handleStart}>{copy.start}</button>
         <div class="footer-space"></div>
         <label class="welcome-toggle">
             <input
@@ -98,7 +132,7 @@
                 bind:checked={showWelcomeAlways}
                 on:change={handleToggle}
             />
-            <span>Always show this welcome page</span>
+            <span>{copy.showAlways}</span>
         </label>
     </section>
 </main>
@@ -236,6 +270,7 @@
         border-radius: 999px;
         padding: 1.05rem 1.8rem;
         font-weight: 800;
+        min-width: 20ch;
         color: var(--ink-strong);
         background: linear-gradient(
                 135deg,
@@ -260,6 +295,75 @@
         box-shadow: 0 14px 28px var(--shadow-soft);
     }
 
+    .language-row {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .language-prompt {
+        margin: 0.2rem 0 0;
+        font-weight: 700;
+        color: var(--text-muted);
+    }
+
+    .language-row button {
+        all: unset;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--outline-soft);
+        background: rgba(255, 255, 255, 0.2);
+        color: var(--ink-strong);
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition:
+            transform 140ms ease,
+            border-color 140ms ease,
+            box-shadow 140ms ease,
+            opacity 140ms ease;
+    }
+
+    .language-row button:hover {
+        transform: translateY(-1px);
+        border-color: var(--accent);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .language-row button.active {
+        border-color: var(--accent);
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.4),
+            rgba(255, 255, 255, 0.15)
+        );
+    }
+
+    .language-row .flag {
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .language-row .label {
+        letter-spacing: 0.08em;
+    }
+
+    .page.dark-theme .language-row button {
+        color: var(--text);
+        background: rgba(12, 16, 30, 0.45);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .page.dark-theme .language-row button.active {
+        border-color: rgba(255, 214, 138, 0.65);
+        background: rgba(12, 16, 30, 0.65);
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+    }
 
     .welcome-toggle {
         display: flex;

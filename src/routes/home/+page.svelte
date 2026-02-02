@@ -5,32 +5,37 @@
     import MobileMenu from "$lib/components/Menu/MobileMenu.svelte";
     import type { Level, Locale, Question } from "$lib/types";
     import { onMount } from "svelte";
+    import { homeUiText } from "./content";
 
     export let data: {
         questions: Question[];
-        uiText: Record<Locale, Record<string, string>>;
         locales: { id: Locale; label: string; name: string; flag?: string }[];
         levels: Level[];
     };
 
     let questions: Question[] = data.questions ?? [];
-    let uiText: Record<Locale, Record<string, string>> = data.uiText ?? {
-        en: {},
-        es: {},
-        pt: {},
-    };
+    let uiText: Record<Locale, Record<string, string>> = homeUiText;
     let locales = (data.locales ?? []) as {
         id: Locale;
         label: string;
         name: string;
         flag?: string;
     }[];
+    const fallbackLocales: {
+        id: Locale;
+        label: string;
+        name: string;
+        flag?: string;
+    }[] = [
+        { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
+        { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
+        { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
+        { id: "sv", label: "SV", name: "Svenska", flag: "🇸🇪" },
+    ];
     if (!locales.length) {
-        locales = [
-            { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
-            { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
-            { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
-        ];
+        locales = [...fallbackLocales];
+    } else if (!locales.some((l) => l.id === "sv")) {
+        locales = [...locales, fallbackLocales.find((l) => l.id === "sv")!];
     }
     let flags: Record<Locale, string> = Object.fromEntries(
         locales.map((l) => [l.id, l.flag ?? ""]),
@@ -69,6 +74,9 @@
     const selectLanguage = (id: Locale) => {
         locale = id;
         menuOpen = false;
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("vd_locale", id);
+        }
     };
     const toggleMenu = () => (menuOpen = !menuOpen);
 
@@ -102,11 +110,13 @@
                 en: "Creation",
                 es: "Creación",
                 pt: "Criação",
+                sv: "Skapelsen",
             },
             body: {
                 en: "Origins, covenant beginnings, and the first promises.",
                 es: "Orígenes, inicios del pacto y las primeras promesas.",
                 pt: "Origens, início da aliança e as primeiras promessas.",
+                sv: "Ursprung, förbundets början och de första löftena.",
             },
         },
         {
@@ -115,11 +125,13 @@
                 en: "Exodus",
                 es: "Éxodo",
                 pt: "Êxodo",
+                sv: "Uttåget",
             },
             body: {
                 en: "Liberation, wilderness faith, and God’s covenant.",
                 es: "Liberación, fe en el desierto y el pacto de Dios.",
                 pt: "Libertação, fé no deserto e a aliança de Deus.",
+                sv: "Befrielse, tro i öknen och Guds förbund.",
             },
         },
         {
@@ -128,11 +140,13 @@
                 en: "Kings",
                 es: "Reyes",
                 pt: "Reis",
+                sv: "Kungarna",
             },
             body: {
                 en: "Rise and fall of Israel’s kingdom and its leaders.",
                 es: "Ascenso y caída del reino de Israel y sus líderes.",
                 pt: "Ascensão e queda do reino de Israel e seus líderes.",
+                sv: "Israels rikes uppgång och fall och dess ledare.",
             },
         },
         {
@@ -141,11 +155,13 @@
                 en: "Christ",
                 es: "Cristo",
                 pt: "Cristo",
+                sv: "Kristus",
             },
             body: {
                 en: "Life, teachings, and redemption through Jesus.",
                 es: "Vida, enseñanzas y redención en Jesús.",
                 pt: "Vida, ensinamentos e redenção em Jesus.",
+                sv: "Jesu liv, undervisning och frälsning.",
             },
         },
         {
@@ -154,11 +170,13 @@
                 en: "Church",
                 es: "Iglesia",
                 pt: "Igreja",
+                sv: "Kyrkan",
             },
             body: {
                 en: "The early church, apostles, and mission.",
                 es: "La iglesia primitiva, los apóstoles y la misión.",
                 pt: "A igreja primitiva, os apóstolos e a missão.",
+                sv: "Den tidiga kyrkan, apostlarna och missionen.",
             },
         },
     ];
@@ -173,6 +191,7 @@
             timelineBody:
                 "Journey from Creation to the early Church with a curated sequence of questions.",
             startTimeline: "Start timeline",
+            viewTimeline: "View timeline",
             startPrefix: "Start",
             guidedLabel: "Guided",
         },
@@ -185,6 +204,7 @@
             timelineBody:
                 "Viaja desde la Creación hasta la Iglesia primitiva con una secuencia guiada.",
             startTimeline: "Iniciar línea",
+            viewTimeline: "Ver línea del tiempo",
             startPrefix: "Iniciar",
             guidedLabel: "Guiada",
         },
@@ -197,8 +217,22 @@
             timelineBody:
                 "Siga da Criação à Igreja primitiva com uma sequência guiada de perguntas.",
             startTimeline: "Iniciar linha",
+            viewTimeline: "Ver linha do tempo",
             startPrefix: "Iniciar",
             guidedLabel: "Guiada",
+        },
+        sv: {
+            eyebrow: "Ny resa",
+            title: "Välj din väg genom Skriften",
+            body: "Välj hela tidslinjen för en guidad berättelse, eller fördjupa dig i en kategori.",
+            sectionLabel: "Tidslinje eller era",
+            timelineTitle: "Hela tidslinjen",
+            timelineBody:
+                "Färdas från Skapelsen till den tidiga kyrkan med en guidad följd av frågor.",
+            startTimeline: "Starta tidslinje",
+            viewTimeline: "Visa tidslinjen",
+            startPrefix: "Starta",
+            guidedLabel: "Guidad",
         },
     } as const;
 
@@ -214,6 +248,10 @@
             typeof localStorage !== "undefined"
                 ? localStorage.getItem("theme")
                 : null;
+        const storedLocale =
+            typeof localStorage !== "undefined"
+                ? localStorage.getItem("vd_locale")
+                : null;
         const prefersDark =
             typeof matchMedia !== "undefined" &&
             window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -224,6 +262,9 @@
                   ? "dark"
                   : "light";
         applyTheme(next as Theme);
+        if (storedLocale && languages.some((item) => item.id === storedLocale)) {
+            locale = storedLocale as Locale;
+        }
         markVisited();
         window.addEventListener("resize", updateIsMobile);
         return () => window.removeEventListener("resize", updateIsMobile);
@@ -248,6 +289,8 @@
         loginLabel={t("login")}
         guestPrefLabel={t("guestPref")}
         styleLabel="Theme"
+        exploreLabel={t("explore")}
+        welcomeIntroLabel={t("welcomeIntro")}
         languageLabel={t("language")}
         {languages}
         {locale}
@@ -275,6 +318,8 @@
                 loginLabel={t("login")}
                 guestPrefLabel={t("guestPref")}
                 styleLabel="Theme"
+                exploreLabel={t("explore")}
+                welcomeIntroLabel={t("welcomeIntro")}
                 languageLabel={t("language")}
                 {languages}
                 {locale}
@@ -295,7 +340,7 @@
             <p class="landing-body">
                 {landing.body}
             </p>
-            <a class="timeline-link" href="/timeline">View timeline</a>
+            <a class="timeline-link" href="/timeline">{landing.viewTimeline}</a>
         </header>
 
         <p class="section-label">{landing.sectionLabel}</p>

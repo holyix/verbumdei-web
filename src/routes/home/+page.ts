@@ -1,12 +1,12 @@
 import type { PageLoad } from "./$types";
 import type { Level, Locale, Question } from "$lib/types";
 
-const REQUIRED_LOCALES: Locale[] = ["en", "es", "pt"];
+const REQUIRED_LOCALES: Locale[] = ["en", "es", "pt", "sv"];
 const LETTERS = "abcdefghijklmnopqrstuvwxyz".split("");
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8080";
 
 const ensureLocales = (value: Record<string, string> | null | undefined) => {
-    const out: Record<Locale, string> = { en: "", es: "", pt: "" };
+    const out: Record<Locale, string> = { en: "", es: "", pt: "", sv: "" };
     for (const locale of REQUIRED_LOCALES) {
         const v = value?.[locale];
         out[locale] = typeof v === "string" ? v : "";
@@ -57,7 +57,6 @@ const mapQuestion = (raw: any, idx: number): Question => {
 
 export const load: PageLoad = async ({ fetch }) => {
     let questions: Question[] = [];
-    let uiText: Record<Locale, Record<string, string>> | null = null;
     let locales: { id: Locale; label: string; name: string; flag?: string }[] =
         [];
     let levels: Level[] = [];
@@ -71,17 +70,6 @@ export const load: PageLoad = async ({ fetch }) => {
         }
     } catch (err) {
         console.error("Failed to fetch questions", err);
-    }
-
-    // fetch UI elements
-    try {
-        const res = await fetch(`${API_BASE}/v1/ui/elements`);
-        if (res.ok) {
-            const body = await res.json();
-            if (body?.ui_text) uiText = body.ui_text;
-        }
-    } catch (err) {
-        console.error("Failed to fetch ui elements", err);
     }
 
     // fetch locales
@@ -111,23 +99,17 @@ export const load: PageLoad = async ({ fetch }) => {
     }
 
     // fallbacks if API missing
-    if (!uiText) {
-        uiText = {
-            en: {},
-            es: {},
-            pt: {},
-        };
-    }
     if (!locales.length) {
         locales = [
             { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
             { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
             { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
+            { id: "sv", label: "SV", name: "Svenska", flag: "🇸🇪" },
         ];
     }
     if (!levels.length) {
         levels = [];
     }
 
-    return { questions, uiText, locales, levels };
+    return { questions, locales, levels };
 };

@@ -3,7 +3,12 @@
 
     export let languages: { id: Locale; label: string; name: string }[] = [];
     export let locale: Locale;
-    export let flags: Record<Locale, string> = { en: "🇬🇧", es: "🇪🇸", pt: "🇧🇷" };
+    export let flags: Record<Locale, string> = {
+        en: "🇬🇧",
+        es: "🇪🇸",
+        pt: "🇧🇷",
+        sv: "🇸🇪",
+    };
     export let selectLanguage: (id: Locale) => void;
 </script>
 

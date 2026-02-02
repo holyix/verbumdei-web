@@ -1,73 +1,25 @@
 <script lang="ts">
     import TimelineCard from "$lib/components/Timeline/TimelineCard.svelte";
     import StickFigure from "$lib/components/StickFigure/StickFigure.svelte";
+    import { browser } from "$app/environment";
     import { goto } from "$app/navigation";
     import { onMount, onDestroy } from "svelte";
-
-    type Stage = {
-        id: string;
-        title: string;
-        era: string;
-        summary: string;
-        progress: number;
-        offset: number;
-        side: "left" | "right";
-    };
-
-    const stages: Stage[] = [
-        {
-            id: "creation",
-            title: "Creation",
-            era: "Genesis",
-            summary: "Origins, covenant beginnings, and the first promises.",
-            progress: 0.0,
-            offset: 0,
-            side: "left",
-        },
-        {
-            id: "exodus",
-            title: "Exodus",
-            era: "Deliverance",
-            summary:
-                "Liberation, wilderness faith, and a people formed by God.",
-            progress: 0.35,
-            offset: 0,
-            side: "right",
-        },
-        {
-            id: "kings",
-            title: "Kings",
-            era: "Kingdom",
-            summary: "Rise and fall of Israel’s kingdom and its leaders.",
-            progress: 0.75,
-            offset: 0,
-            side: "right",
-        },
-        {
-            id: "christ",
-            title: "Christ",
-            era: "Gospels",
-            summary: "Life, teachings, and redemption through Jesus.",
-            progress: 0.0,
-            offset: 0,
-            side: "left",
-        },
-        {
-            id: "church",
-            title: "Church",
-            era: "Acts & Letters",
-            summary: "The early church, apostles, and mission.",
-            progress: 1.0,
-            offset: 0,
-            side: "left",
-        },
-    ];
+    import type { Locale } from "$lib/types";
+    import { stages, timelineHero } from "./content";
 
     const timelineStages = [...stages].reverse();
     let isMobile = false;
     let mobileQuery: MediaQueryList | null = null;
     type Theme = "light" | "dark";
     let theme: Theme = "dark";
+    let locale: Locale = "en";
+    const allowedLocales = new Set<Locale>(["en", "es", "pt", "sv"]);
+    if (browser) {
+        const storedLocale = localStorage.getItem("vd_locale");
+        if (storedLocale && allowedLocales.has(storedLocale as Locale)) {
+            locale = storedLocale as Locale;
+        }
+    }
 
     const startStage = (id: string) => {
         goto(`/quiz?category=${id}`);
@@ -81,8 +33,21 @@
         isMobile = mobileQuery ? mobileQuery.matches : false;
     };
 
+    const setLocaleFromStorage = () => {
+        const storedLocale =
+            typeof localStorage !== "undefined"
+                ? localStorage.getItem("vd_locale")
+                : null;
+        if (storedLocale && allowedLocales.has(storedLocale as Locale)) {
+            locale = storedLocale as Locale;
+        } else {
+            locale = "en";
+        }
+    };
+
     onMount(() => {
         if (typeof window === "undefined") return;
+        setLocaleFromStorage();
         const stored =
             typeof localStorage !== "undefined"
                 ? localStorage.getItem("theme")
@@ -102,10 +67,14 @@
         mobileQuery = window.matchMedia("(max-width: 900px)");
         mobileQuery.addEventListener("change", updateMobile);
         updateMobile();
+        window.addEventListener("storage", setLocaleFromStorage);
     });
 
     onDestroy(() => {
         mobileQuery?.removeEventListener("change", updateMobile);
+        if (typeof window !== "undefined") {
+            window.removeEventListener("storage", setLocaleFromStorage);
+        }
     });
 
     const stageBackgrounds: Record<string, string> = {
@@ -120,6 +89,10 @@
         stages.reduce((total, stage) => total + stage.progress, 0) /
         stages.length;
 
+    const pickLocale = (value: Record<Locale, string>) =>
+        value[locale] ?? value.en;
+    $: heroCopy = timelineHero[locale] ?? timelineHero.en;
+
     const resolveStageBackground = (id: string) => {
         const base = stageBackgrounds[id] ?? "/illustrations/quest-hero.svg";
         if (theme === "light" && base.includes("quest-hero")) {
@@ -132,12 +105,9 @@
 <main class={`page ${theme === "light" ? "light-theme" : "dark-theme"}`}>
     <section class="hero">
         <div class="hero-left">
-            <p class="eyebrow">The path to salvation</p>
-            <h1>Walk the story, step by step</h1>
-            <p class="lede">
-                Follow the unfolding story from Genesis to the early Church. Each
-                era is a doorway, and every answer moves you forward.
-            </p>
+            <p class="eyebrow">{heroCopy.eyebrow}</p>
+            <h1>{heroCopy.title}</h1>
+            <p class="lede">{heroCopy.body}</p>
         </div>
         <button class="icon-link" type="button" on:click={goHome} aria-label="Home" title="Home">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -176,9 +146,9 @@
                     {#if side === "left"}
                         <TimelineCard
                             stageId={stage.id}
-                            title={stage.title}
-                            era={stage.era}
-                            summary={stage.summary}
+                            title={pickLocale(stage.title)}
+                            era={pickLocale(stage.era)}
+                            summary={pickLocale(stage.summary)}
                             progress={stage.progress}
                             offset={stage.offset}
                             bgImage={resolveStageBackground(stage.id)}
@@ -197,9 +167,9 @@
                     {#if side === "right"}
                         <TimelineCard
                             stageId={stage.id}
-                            title={stage.title}
-                            era={stage.era}
-                            summary={stage.summary}
+                            title={pickLocale(stage.title)}
+                            era={pickLocale(stage.era)}
+                            summary={pickLocale(stage.summary)}
                             progress={stage.progress}
                             offset={stage.offset}
                             bgImage={resolveStageBackground(stage.id)}

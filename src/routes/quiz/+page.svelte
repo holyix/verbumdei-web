@@ -8,32 +8,37 @@
     import VictoryOverlay from "$lib/components/VictoryOverlay/VictoryOverlay.svelte";
     import type { Level, Locale, Option, Question } from "$lib/types";
     import { onDestroy, onMount } from "svelte";
+    import { quizUiText } from "./content";
 
     export let data: {
         questions: Question[];
-        uiText: Record<Locale, Record<string, string>>;
         locales: { id: Locale; label: string; name: string; flag?: string }[];
         levels: Level[];
     };
 
     let questions: Question[] = data.questions ?? [];
-    let uiText: Record<Locale, Record<string, string>> = data.uiText ?? {
-        en: {},
-        es: {},
-        pt: {},
-    };
+    let uiText: Record<Locale, Record<string, string>> = quizUiText;
     let locales = (data.locales ?? []) as {
         id: Locale;
         label: string;
         name: string;
         flag?: string;
     }[];
+    const fallbackLocales: {
+        id: Locale;
+        label: string;
+        name: string;
+        flag?: string;
+    }[] = [
+        { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
+        { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
+        { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
+        { id: "sv", label: "SV", name: "Svenska", flag: "🇸🇪" },
+    ];
     if (!locales.length) {
-        locales = [
-            { id: "en", label: "EN", name: "English", flag: "🇬🇧" },
-            { id: "es", label: "ES", name: "Español", flag: "🇪🇸" },
-            { id: "pt", label: "PT", name: "Português", flag: "🇧🇷" },
-        ];
+        locales = [...fallbackLocales];
+    } else if (!locales.some((l) => l.id === "sv")) {
+        locales = [...locales, fallbackLocales.find((l) => l.id === "sv")!];
     }
     let flags: Record<Locale, string> = Object.fromEntries(
         locales.map((l) => [l.id, l.flag ?? ""]),
@@ -48,8 +53,8 @@
 
     const emptyQuestion: Question = {
         id: "",
-        stage: { en: "", es: "", pt: "" },
-        prompt: { en: "", es: "", pt: "" },
+        stage: { en: "", es: "", pt: "", sv: "" },
+        prompt: { en: "", es: "", pt: "", sv: "" },
         options: [],
     };
 
@@ -211,6 +216,9 @@
     const selectLanguage = (id: Locale) => {
         locale = id;
         menuOpen = false;
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("vd_locale", id);
+        }
     };
     const toggleMenu = () => (menuOpen = !menuOpen);
 
@@ -241,6 +249,10 @@
             typeof localStorage !== "undefined"
                 ? localStorage.getItem("theme")
                 : null;
+        const storedLocale =
+            typeof localStorage !== "undefined"
+                ? localStorage.getItem("vd_locale")
+                : null;
         const prefersDark =
             typeof matchMedia !== "undefined" &&
             window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -251,6 +263,9 @@
                   ? "dark"
                   : "light";
         applyTheme(next as Theme);
+        if (storedLocale && languages.some((item) => item.id === storedLocale)) {
+            locale = storedLocale as Locale;
+        }
         markVisited();
         window.addEventListener("resize", updateIsMobile);
         return () => window.removeEventListener("resize", updateIsMobile);
@@ -277,6 +292,8 @@
         loginLabel={t("login")}
         guestPrefLabel={t("guestPref")}
         styleLabel="Theme"
+        exploreLabel={t("explore")}
+        welcomeIntroLabel={t("welcomeIntro")}
         languageLabel={t("language")}
         {languages}
         {locale}
@@ -304,6 +321,8 @@
                 loginLabel={t("login")}
                 guestPrefLabel={t("guestPref")}
                 styleLabel="Theme"
+                exploreLabel={t("explore")}
+                welcomeIntroLabel={t("welcomeIntro")}
                 languageLabel={t("language")}
                 {languages}
                 {locale}
