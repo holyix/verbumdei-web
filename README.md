@@ -26,6 +26,8 @@ npm run dev -- --open
 - `npm run build` — production build
 - `npm run preview` — run the built app locally
 - `npm run lint` — lint Svelte/TypeScript
+- `npm run format` — format code with Prettier
+- `npm run format:check` — verify formatting with Prettier
 - `npm run typecheck` — SvelteKit sync + TypeScript check
 
 ## Environment
@@ -41,6 +43,5 @@ VITE_API_URL=https://your-api.example.com
 - `GET /v1/questions` (and `/v1/questions/:id`) — quiz content
 - `GET /v1/ui/locales` — language list (id/label/name/flag)
 - `GET /v1/ui/levels` — level list (id + localized labels)
-- `GET /v1/ui/elements` — localized UI copy
 
-The frontend falls back to local defaults if these endpoints are unavailable, but runs best when connected to the Rust API.\*\*\*
+The frontend falls back to local defaults if these endpoints are unavailable, but runs best when connected to the Rust API.
