@@ -8,8 +8,7 @@
 
     $: isLight = theme === "light";
     $: modeText = theme === "dark" ? "Dark mode" : "Light mode";
-    $: ariaLabel =
-        theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    $: ariaLabel = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
 </script>
 
 <div class:compact={!showText} class="theme-toggle">

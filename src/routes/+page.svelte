@@ -5,8 +5,7 @@
 
     onMount(() => {
         if (!browser) return;
-        const showWelcomeAlways =
-            localStorage.getItem("vd_show_welcome_always") === "1";
+        const showWelcomeAlways = localStorage.getItem("vd_show_welcome_always") === "1";
         const hasVisited = !!localStorage.getItem("vd_has_visited");
 
         if (!hasVisited || showWelcomeAlways) {

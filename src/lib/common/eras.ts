@@ -117,8 +117,6 @@ export const eras: EraContent[] = [
     },
 ];
 
-export const erasById: Record<EraId, EraContent> = Object
-    .fromEntries(eras.map((item) => [item.id, item])) as Record<
-    EraId,
-    EraContent
->;
+export const erasById: Record<EraId, EraContent> = Object.fromEntries(
+    eras.map((item) => [item.id, item]),
+) as Record<EraId, EraContent>;

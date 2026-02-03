@@ -41,20 +41,14 @@
     const handleStart = () => {
         markVisited();
         if (browser) {
-            localStorage.setItem(
-                "vd_show_welcome_always",
-                showWelcomeAlways ? "1" : "",
-            );
+            localStorage.setItem("vd_show_welcome_always", showWelcomeAlways ? "1" : "");
         }
         goto("/home"); // home/landing
     };
 
     const handleToggle = () => {
         if (browser) {
-            localStorage.setItem(
-                "vd_show_welcome_always",
-                showWelcomeAlways ? "1" : "",
-            );
+            localStorage.setItem("vd_show_welcome_always", showWelcomeAlways ? "1" : "");
         }
     };
 
@@ -79,8 +73,7 @@
                   : "light";
         applyTheme(next);
 
-        showWelcomeAlways =
-            localStorage.getItem("vd_show_welcome_always") === "1";
+        showWelcomeAlways = localStorage.getItem("vd_show_welcome_always") === "1";
         const storedLocale = localStorage.getItem("vd_locale");
         if (storedLocale && locales.some((item) => item.id === storedLocale)) {
             locale = storedLocale as Locale;
@@ -90,9 +83,7 @@
     $: copy = welcomeText[locale] ?? welcomeText.en;
 </script>
 
-<main
-    class={`page ${theme === "light" ? "light-theme" : "dark-theme"} welcome-only`}
->
+<main class={`page ${theme === "light" ? "light-theme" : "dark-theme"} welcome-only`}>
     <div class="glow gold" aria-hidden="true"></div>
     <div class="glow purple" aria-hidden="true"></div>
     <div class="glow crimson" aria-hidden="true"></div>
@@ -127,11 +118,7 @@
         <button class="primary soft" on:click={handleStart}>{copy.start}</button>
         <div class="footer-space"></div>
         <label class="welcome-toggle">
-            <input
-                type="checkbox"
-                bind:checked={showWelcomeAlways}
-                on:change={handleToggle}
-            />
+            <input type="checkbox" bind:checked={showWelcomeAlways} on:change={handleToggle} />
             <span>{copy.showAlways}</span>
         </label>
     </section>
@@ -191,11 +178,7 @@
         border: 1px solid var(--outline-soft);
         border-radius: 20px;
         background:
-            linear-gradient(
-                180deg,
-                rgba(248, 243, 231, 0.9),
-                rgba(234, 215, 188, 0.85)
-            ),
+            linear-gradient(180deg, rgba(248, 243, 231, 0.9), rgba(234, 215, 188, 0.85)),
             url("/illustrations/quest-hero-light.svg") center/cover,
             linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2)),
             var(--bg);
@@ -212,16 +195,8 @@
 
     .page.dark-theme .intro-card {
         background:
-            linear-gradient(
-                160deg,
-                rgba(18, 26, 52, 0.9),
-                rgba(18, 24, 41, 0.9)
-            ),
-            linear-gradient(
-                160deg,
-                rgba(12, 14, 24, 0.6),
-                rgba(18, 20, 32, 0.6)
-            ),
+            linear-gradient(160deg, rgba(18, 26, 52, 0.9), rgba(18, 24, 41, 0.9)),
+            linear-gradient(160deg, rgba(12, 14, 24, 0.6), rgba(18, 20, 32, 0.6)),
             url("/illustrations/quest-hero.svg") center/cover,
             var(--bg);
         color: var(--text);
@@ -272,11 +247,8 @@
         font-weight: 800;
         min-width: 20ch;
         color: var(--ink-strong);
-        background: linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.25),
-                rgba(255, 255, 255, 0.1)
-            ),
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1)),
             linear-gradient(135deg, var(--accent), var(--accent-strong));
         box-shadow:
             0 12px 24px rgba(0, 0, 0, 0.18),
@@ -337,11 +309,7 @@
     .language-row button.active {
         border-color: var(--accent);
         box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
-        background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.4),
-            rgba(255, 255, 255, 0.15)
-        );
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.15));
     }
 
     .language-row .flag {

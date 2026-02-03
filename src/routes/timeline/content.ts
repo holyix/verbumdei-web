@@ -11,10 +11,13 @@ export type LocalizedStage = {
     side: "left" | "right";
 };
 
-export const timelineHero: Record<
-    Locale,
-    { eyebrow: string; title: string; body: string }
-> = {
+export type TimelineHeroText = {
+    eyebrow: string;
+    title: string;
+    body: string;
+};
+
+export const timelineHero: Record<Locale, TimelineHeroText> = {
     en: {
         eyebrow: "The path to salvation",
         title: "Walk the story, step by step",
@@ -37,10 +40,13 @@ export const timelineHero: Record<
     },
 };
 
-const stageLayout: Record<
-    EraId,
-    { progress: number; offset: number; side: "left" | "right" }
-> = {
+type StageLayout = {
+    progress: number;
+    offset: number;
+    side: "left" | "right";
+};
+
+const stageLayout: Record<EraId, StageLayout> = {
     creation: { progress: 0.0, offset: 0, side: "left" },
     exodus: { progress: 0.35, offset: 0, side: "right" },
     kings: { progress: 0.75, offset: 0, side: "right" },
@@ -48,13 +54,7 @@ const stageLayout: Record<
     church: { progress: 1.0, offset: 0, side: "left" },
 };
 
-const stageOrder: EraId[] = [
-    "creation",
-    "exodus",
-    "kings",
-    "christ",
-    "church",
-];
+const stageOrder: EraId[] = ["creation", "exodus", "kings", "christ", "church"];
 
 export const stages: LocalizedStage[] = stageOrder.map((id) => ({
     id,

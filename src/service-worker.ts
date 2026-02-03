@@ -20,7 +20,7 @@ self.addEventListener("install", (event: ExtendableEvent) => {
                 // Ensure the new SW activates even if caching partially failed
                 await sw.skipWaiting();
             }
-        })()
+        })(),
     );
 });
 
@@ -29,7 +29,7 @@ self.addEventListener("activate", (event: ExtendableEvent) => {
         caches
             .keys()
             .then((keys) => Promise.all(keys.map((key) => key !== CACHE && caches.delete(key))))
-            .then(() => sw.clients.claim())
+            .then(() => sw.clients.claim()),
     );
 });
 

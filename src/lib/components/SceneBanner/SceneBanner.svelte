@@ -3,8 +3,8 @@
         <p class="scene-kicker">Visual placeholder</p>
         <h2 class="scene-title">Biblical action-cartoon vignette</h2>
         <p class="scene-note">
-            Reserve this space for the illustrated panel (e.g., Creation crossing to Covenant). Replace
-            the SVG at <code>static/illustrations/quest-hero.svg</code> with the real artwork.
+            Reserve this space for the illustrated panel (e.g., Creation crossing to Covenant).
+            Replace the SVG at <code>static/illustrations/quest-hero.svg</code> with the real artwork.
         </p>
     </div>
 </section>
@@ -19,11 +19,7 @@
         background:
             linear-gradient(180deg, var(--scene-veil-1), var(--scene-veil-2)),
             url("/illustrations/quest-hero.svg") center/cover,
-            radial-gradient(
-                circle at 15% 20%,
-                var(--bg-spot-1),
-                transparent 32%
-            ),
+            radial-gradient(circle at 15% 20%, var(--bg-spot-1), transparent 32%),
             var(--bg);
         overflow: hidden;
         box-shadow: 0 18px 40px var(--shadow-soft);
@@ -33,11 +29,7 @@
 
     .scene-overlay {
         backdrop-filter: blur(4px);
-        background: linear-gradient(
-            180deg,
-            var(--scene-overlay-1),
-            var(--scene-overlay-2)
-        );
+        background: linear-gradient(180deg, var(--scene-overlay-1), var(--scene-overlay-2));
         padding: 1rem 1.4rem;
     }
 

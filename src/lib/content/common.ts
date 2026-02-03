@@ -6,8 +6,7 @@ export const commonUiText: UiTextByLocale = {
     en: {
         eyebrow: "Verbum Quest · Mock Quiz",
         title: "Journey through the Word",
-        subtitle:
-            "Learn the Good News in a playful way—journey through Salvation History.",
+        subtitle: "Learn the Good News in a playful way—journey through Salvation History.",
         score: "Level",
         question: "Question",
         of: "of",
@@ -23,8 +22,7 @@ export const commonUiText: UiTextByLocale = {
     es: {
         eyebrow: "Verbum Quest · Quiz de prueba",
         title: "Peregrina por la Palabra",
-        subtitle:
-            "Aprende la Buena Nueva de forma lúdica—recorre la Historia de la Salvación.",
+        subtitle: "Aprende la Buena Nueva de forma lúdica—recorre la Historia de la Salvación.",
         score: "Nivel",
         question: "Pregunta",
         of: "de",
@@ -40,8 +38,7 @@ export const commonUiText: UiTextByLocale = {
     pt: {
         eyebrow: "Verbum Quest · Quiz de teste",
         title: "Caminho pela Palavra",
-        subtitle:
-            "Aprenda a Boa Nova de forma lúdica—caminhe pela História da Salvação.",
+        subtitle: "Aprenda a Boa Nova de forma lúdica—caminhe pela História da Salvação.",
         score: "Nível",
         question: "Pergunta",
         of: "de",
@@ -73,10 +70,7 @@ export const commonUiText: UiTextByLocale = {
     },
 };
 
-export const mergeUiText = (
-    base: UiTextByLocale,
-    specific: UiTextByLocale,
-): UiTextByLocale => ({
+export const mergeUiText = (base: UiTextByLocale, specific: UiTextByLocale): UiTextByLocale => ({
     en: { ...base.en, ...specific.en },
     es: { ...base.es, ...specific.es },
     pt: { ...base.pt, ...specific.pt },

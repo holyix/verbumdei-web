@@ -43,12 +43,11 @@
     let flags: Record<Locale, string> = Object.fromEntries(
         locales.map((l) => [l.id, l.flag ?? ""]),
     ) as Record<Locale, string>;
-    const languages: { id: Locale; label: string; name: string }[] =
-        locales.map((l) => ({
-            id: l.id,
-            label: l.label,
-            name: l.name,
-        }));
+    const languages: { id: Locale; label: string; name: string }[] = locales.map((l) => ({
+        id: l.id,
+        label: l.label,
+        name: l.name,
+    }));
     let levels: Level[] = data.levels ?? [];
 
     const emptyQuestion: Question = {
@@ -91,8 +90,7 @@
     $: selectedOption = currentQuestion.options.find((o) => o.id === selected);
     $: isCorrect = !!selectedOption?.correct;
     $: retakeCount = retakes[currentQuestion.id] ?? 0;
-    $: retakeAvailable =
-        revealed && !isCorrect && retakeCount < 1 && !completed;
+    $: retakeAvailable = revealed && !isCorrect && retakeCount < 1 && !completed;
 
     const selectAnswer = (id: string) => {
         if (revealed) return;
@@ -158,16 +156,12 @@
 
     $: totalQuestions = questions.length;
     $: progressPercent =
-        totalQuestions > 0
-            ? Math.round(((currentIndex + 1) / totalQuestions) * 100)
-            : 0;
+        totalQuestions > 0 ? Math.round(((currentIndex + 1) / totalQuestions) * 100) : 0;
 
     $: levelIndex = levels.length
         ? Math.min(
               levels.length - 1,
-              totalQuestions > 0
-                  ? Math.floor((score / totalQuestions) * levels.length)
-                  : 0,
+              totalQuestions > 0 ? Math.floor((score / totalQuestions) * levels.length) : 0,
           )
         : 0;
     $: levelValue = levels.length ? levels[levelIndex].label[locale] : "";
@@ -239,29 +233,17 @@
 
     onMount(() => {
         const updateIsMobile = () => {
-            isMobile =
-                typeof window !== "undefined"
-                    ? window.innerWidth <= 768
-                    : false;
+            isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
         };
         updateIsMobile();
-        const stored =
-            typeof localStorage !== "undefined"
-                ? localStorage.getItem("theme")
-                : null;
+        const stored = typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
         const storedLocale =
-            typeof localStorage !== "undefined"
-                ? localStorage.getItem("vd_locale")
-                : null;
+            typeof localStorage !== "undefined" ? localStorage.getItem("vd_locale") : null;
         const prefersDark =
             typeof matchMedia !== "undefined" &&
             window.matchMedia("(prefers-color-scheme: dark)").matches;
         const next =
-            stored === "light" || stored === "dark"
-                ? stored
-                : prefersDark
-                  ? "dark"
-                  : "light";
+            stored === "light" || stored === "dark" ? stored : prefersDark ? "dark" : "light";
         applyTheme(next as Theme);
         if (storedLocale && languages.some((item) => item.id === storedLocale)) {
             locale = storedLocale as Locale;
@@ -371,7 +353,6 @@
             {theme}
         />
     {/if}
-
 </main>
 
 <style>

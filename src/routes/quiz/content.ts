@@ -1,7 +1,25 @@
 import type { Locale } from "$lib/types";
 import { commonUiText, mergeUiText } from "$lib/content/common";
 
-const quizSpecificUiText: Record<Locale, Record<string, string>> = {
+export type QuizText = {
+    welcomeTitle: string;
+    welcomeBody: string;
+    start: string;
+    source: string;
+    correct: string;
+    correctMsg: string;
+    incorrectMsg: string;
+    restart: string;
+    next: string;
+    finish: string;
+    playAgain: string;
+    loginCta: string;
+    perfectTitle: string;
+    perfectBody: string;
+    perfectCTA: string;
+};
+
+const uiTextOverrides: Record<Locale, QuizText> = {
     en: {
         welcomeTitle: "Welcome to Verbum Quest",
         welcomeBody:
@@ -35,8 +53,7 @@ const quizSpecificUiText: Record<Locale, Record<string, string>> = {
         playAgain: "Jugar de nuevo",
         loginCta: "Iniciar sesión / Registrarse",
         perfectTitle: "Peregrinación perfecta",
-        perfectBody:
-            "Respondiste todo correcto. Te aguarda un momento de gracia.",
+        perfectBody: "Respondiste todo correcto. Te aguarda un momento de gracia.",
         perfectCTA: "¡Anuncia la Buena Nueva!",
     },
     pt: {
@@ -72,10 +89,9 @@ const quizSpecificUiText: Record<Locale, Record<string, string>> = {
         playAgain: "Spela igen",
         loginCta: "Logga in / Skapa konto",
         perfectTitle: "Perfekt pilgrimsfärd!",
-        perfectBody:
-            "Du svarade rätt på alla frågor. Ett ögonblick av nåd väntar.",
+        perfectBody: "Du svarade rätt på alla frågor. Ett ögonblick av nåd väntar.",
         perfectCTA: "Sprid de goda nyheterna!",
     },
 };
 
-export const quizUiText = mergeUiText(commonUiText, quizSpecificUiText);
+export const quizUiText = mergeUiText(commonUiText, uiTextOverrides);

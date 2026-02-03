@@ -16,7 +16,8 @@ const ensureLocales = (value: Record<string, string> | null | undefined) => {
 
 const mapQuestion = (raw: any, idx: number): Question => {
     const image_url = typeof raw?.image_url === "string" ? raw.image_url : undefined;
-    const image_url_light = typeof raw?.image_url_light === "string" ? raw.image_url_light : undefined;
+    const image_url_light =
+        typeof raw?.image_url_light === "string" ? raw.image_url_light : undefined;
     const image_url_dark = typeof raw?.image_url_dark === "string" ? raw.image_url_dark : undefined;
 
     const options = Array.isArray(raw.options)
@@ -38,9 +39,7 @@ const mapQuestion = (raw: any, idx: number): Question => {
     const baseImage = image_url ?? "/illustrations/quest-hero.svg";
     const lightImage =
         image_url_light ??
-        (baseImage.includes("quest-hero")
-            ? "/illustrations/quest-hero-light.svg"
-            : baseImage);
+        (baseImage.includes("quest-hero") ? "/illustrations/quest-hero-light.svg" : baseImage);
     const darkImage = image_url_dark ?? baseImage;
 
     return {
@@ -57,8 +56,7 @@ const mapQuestion = (raw: any, idx: number): Question => {
 
 export const load: PageLoad = async ({ fetch }) => {
     let questions: Question[] = [];
-    let locales: { id: Locale; label: string; name: string; flag?: string }[] =
-        [];
+    let locales: { id: Locale; label: string; name: string; flag?: string }[] = [];
     let levels: Level[] = [];
 
     try {

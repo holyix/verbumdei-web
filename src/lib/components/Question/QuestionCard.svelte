@@ -11,9 +11,9 @@
     export let completed: boolean;
     export let retakeDisabled: boolean = false;
     export let theme: "light" | "dark";
-    export let t: (key: string) => string;
+    export let t: (_key: string) => string;
     export let answeredCorrectly: boolean;
-    export let onSelect: (id: string) => void;
+    export let onSelect: (_id: string) => void;
     export let onNext: () => void;
     export let onRetake: () => void;
     export let onRestart: () => void;
@@ -31,9 +31,7 @@
             : question.image_url);
 
     const darkBackground =
-        question.image_url_dark ??
-        question.image_url ??
-        "/illustrations/quest-hero.svg";
+        question.image_url_dark ?? question.image_url ?? "/illustrations/quest-hero.svg";
 
     const openShare = async () => {
         const url = window?.location?.href ?? "/";
@@ -51,7 +49,7 @@
         if (navigator?.clipboard?.writeText) {
             try {
                 await navigator.clipboard.writeText(url);
-            } catch (_) {
+            } catch (_error) {
                 /* ignore */
             }
         }
@@ -158,24 +156,16 @@
             {#each question.options as option}
                 <button
                     class:selected={selected === option.id}
-                    class:correct={revealed &&
-                        option.correct &&
-                        selected === option.id}
-                    class:incorrect={revealed &&
-                        selected === option.id &&
-                        !option.correct}
+                    class:correct={revealed && option.correct && selected === option.id}
+                    class:incorrect={revealed && selected === option.id && !option.correct}
                     on:click={() => onSelect(option.id)}
                 >
                     <span class="bullet">{option.id.toUpperCase()}</span>
                     <span class="text">{option.text[locale]}</span>
                     {#if revealed && selected === option.id && option.correct}
-                        <span class="badge correct-badge" aria-label={t("correct")}>
-                            ✓
-                        </span>
+                        <span class="badge correct-badge" aria-label={t("correct")}> ✓ </span>
                     {:else if revealed && selected === option.id && !option.correct}
-                        <span class="badge incorrect-badge" aria-label={t("incorrect")}>
-                            ✕
-                        </span>
+                        <span class="badge incorrect-badge" aria-label={t("incorrect")}> ✕ </span>
                     {:else}
                         <span class="badge placeholder"></span>
                     {/if}
@@ -185,26 +175,17 @@
 
         <div class={`explanation ${revealed ? "visible" : "placeholder"}`}>
             {#if revealed}
-                <p
-                    class:correct={answeredCorrectly}
-                    class:incorrect={!answeredCorrectly}
-                >
+                <p class:correct={answeredCorrectly} class:incorrect={!answeredCorrectly}>
                     {#if answeredCorrectly}
                         {t("correctMsg")}
-                        {question.options.find((o) => o.id === selected)
-                            ?.explanation[locale]}
+                        {question.options.find((o) => o.id === selected)?.explanation[locale]}
                     {:else}
                         {t("incorrectMsg")}
-                        {question.options.find((o) => o.id === selected)
-                            ?.explanation[locale]}
+                        {question.options.find((o) => o.id === selected)?.explanation[locale]}
                     {/if}
                 </p>
                 {#if !completed}
-                    <div
-                        role="presentation"
-                        on:mouseenter={pauseTimer}
-                        on:mouseleave={resumeTimer}
-                    >
+                    <div role="presentation" on:mouseenter={pauseTimer} on:mouseleave={resumeTimer}>
                         <TimerBar {timeLeft} duration={answerDuration} />
                     </div>
                 {/if}
@@ -214,16 +195,12 @@
 
     <div class="actions">
         {#if !completed}
-            <button class="ghost" on:click={onRetake} disabled={retakeDisabled}
-                >Retake</button
-            >
+            <button class="ghost" on:click={onRetake} disabled={retakeDisabled}>Retake</button>
             <button class="primary" disabled={!revealed} on:click={onNext}>
                 {isLastQuestion ? t("finish") : t("next")}
             </button>
         {:else}
-            <button class="primary" on:click={onRestart}
-                >{t("playAgain")}</button
-            >
+            <button class="primary" on:click={onRestart}>{t("playAgain")}</button>
         {/if}
     </div>
 </section>
@@ -260,11 +237,7 @@
 
     .card.light-mode {
         background:
-            linear-gradient(
-                185deg,
-                rgba(246, 236, 210, 0.78),
-                rgba(226, 206, 176, 0.68)
-            ),
+            linear-gradient(185deg, rgba(246, 236, 210, 0.78), rgba(226, 206, 176, 0.68)),
             var(--card-img) center/cover,
             var(--bg);
         background-blend-mode: soft-light, normal, normal;
@@ -312,11 +285,7 @@
         gap: 0.35rem;
         padding: 0.38rem 0.85rem;
         border-radius: 999px;
-        background: linear-gradient(
-            135deg,
-            var(--accent),
-            var(--accent-strong)
-        );
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
         color: var(--ink-strong);
         font-weight: 800;
         text-transform: uppercase;
@@ -432,16 +401,14 @@
     }
 
     .options button.correct {
-        border-bottom: 2px solid
-            color-mix(in srgb, var(--success) 85%, transparent);
+        border-bottom: 2px solid color-mix(in srgb, var(--success) 85%, transparent);
         background: color-mix(in srgb, var(--success) 12%, transparent);
         box-shadow: 0 10px 18px color-mix(in srgb, var(--success) 16%, transparent);
         border-radius: 12px;
     }
 
     .options button.incorrect {
-        border-bottom: 2px solid
-            color-mix(in srgb, var(--danger) 85%, transparent);
+        border-bottom: 2px solid color-mix(in srgb, var(--danger) 85%, transparent);
         background: color-mix(in srgb, var(--danger) 12%, transparent);
         box-shadow: none;
     }
@@ -567,11 +534,7 @@
     }
 
     .actions .primary {
-        background: linear-gradient(
-            135deg,
-            var(--accent),
-            var(--accent-strong)
-        );
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
         color: var(--ink-strong);
         box-shadow: 0 10px 20px var(--shadow-soft);
     }

@@ -25,6 +25,7 @@
 <article
     class={`stage-card ${tone} ${stageId ? `stage-${stageId}` : ""}`}
     style={`--progress: ${progress * 100}%; --offset: ${offset}px; --bg-image: ${bgImage ? `url('${bgImage}')` : "none"};`}
+    on:click
 >
     <div class="card-top">
         <p class="era">{era}</p>
@@ -49,11 +50,7 @@
         padding: 1.5rem 1.6rem;
         border-radius: 20px;
         border: 1px solid var(--outline-soft);
-        --card-overlay: linear-gradient(
-            150deg,
-            var(--card-veil-1),
-            var(--card-veil-2)
-        );
+        --card-overlay: linear-gradient(150deg, var(--card-veil-1), var(--card-veil-2));
         --card-base: var(--bg);
         --card-blend: normal;
         background:
@@ -72,7 +69,10 @@
         transform: translateX(var(--offset, 0px));
         min-height: 120px;
         z-index: 1;
-        transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+        transition:
+            transform 140ms ease,
+            box-shadow 140ms ease,
+            border-color 140ms ease;
         pointer-events: auto;
     }
 
@@ -87,11 +87,7 @@
         position: absolute;
         inset: 0;
         opacity: 0.2;
-        background: radial-gradient(
-            circle at 20% 20%,
-            var(--glow-gold),
-            transparent 45%
-        );
+        background: radial-gradient(circle at 20% 20%, var(--glow-gold), transparent 45%);
         pointer-events: none;
     }
 
@@ -105,27 +101,15 @@
     }
 
     .stage-card.idle {
-        --card-overlay: linear-gradient(
-            150deg,
-            var(--panel-veil-1),
-            var(--panel-veil-2)
-        );
+        --card-overlay: linear-gradient(150deg, var(--panel-veil-1), var(--panel-veil-2));
     }
 
     :global(:root[data-theme="dark"]) .stage-card {
-        --card-overlay: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.55),
-            rgba(0, 0, 0, 0.78)
-        );
+        --card-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.78));
     }
 
     :global(:root[data-theme="dark"]) .stage-card.stage-kings {
-        --card-overlay: linear-gradient(
-            150deg,
-            var(--panel-veil-1),
-            var(--panel-veil-2)
-        );
+        --card-overlay: linear-gradient(150deg, var(--panel-veil-1), var(--panel-veil-2));
     }
 
     :global(:root[data-theme="light"]) .stage-card {
@@ -245,7 +229,6 @@
         border-left: 9px solid var(--accent);
         margin-left: 1px;
     }
-
 
     @media (max-width: 900px) {
         .stage-card {

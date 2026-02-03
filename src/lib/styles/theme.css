@@ -86,22 +86,10 @@ html,
 body {
     margin: 0;
     background-color: var(--bg);
-    background: radial-gradient(
-            circle at 18% 18%,
-            var(--bg-spot-1),
-            transparent 32%
-        ),
-        radial-gradient(
-            circle at 82% 12%,
-            var(--bg-spot-2),
-            transparent 35%
-        ),
-        radial-gradient(
-            circle at 42% 78%,
-            var(--bg-spot-3),
-            transparent 34%
-        ),
-        var(--bg);
+    background:
+        radial-gradient(circle at 18% 18%, var(--bg-spot-1), transparent 32%),
+        radial-gradient(circle at 82% 12%, var(--bg-spot-2), transparent 35%),
+        radial-gradient(circle at 42% 78%, var(--bg-spot-3), transparent 34%), var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
     min-height: 100vh;

@@ -25,7 +25,7 @@
         pt: "🇧🇷",
         sv: "🇸🇪",
     };
-    export let selectLanguage: (id: Locale) => void;
+    export let selectLanguage: (_id: Locale) => void;
     export let theme: "light" | "dark";
     export let toggleTheme: () => void;
 
@@ -75,12 +75,7 @@
                 </div>
                 <div class="menu-section">
                     <div class="menu-label">{languageLabel}</div>
-                    <LanguageSwitcher
-                        {languages}
-                        {locale}
-                        {flags}
-                        {selectLanguage}
-                    />
+                    <LanguageSwitcher {languages} {locale} {flags} {selectLanguage} />
                 </div>
             </div>
         {/if}

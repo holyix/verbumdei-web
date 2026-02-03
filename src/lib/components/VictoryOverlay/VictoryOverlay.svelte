@@ -26,7 +26,8 @@
     .victory-overlay {
         position: fixed;
         inset: 0;
-        background: radial-gradient(
+        background:
+            radial-gradient(
                 circle at 40% 20%,
                 var(--overlay-spot),
                 color-mix(in srgb, var(--bg) 50%, transparent)
@@ -68,8 +69,7 @@
     .victory-card.light {
         background:
             linear-gradient(180deg, rgba(248, 243, 231, 0.92), rgba(234, 215, 188, 0.9)),
-            linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2)),
-            var(--surface);
+            linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2)), var(--surface);
         border-color: color-mix(in srgb, var(--accent-soft) 75%, #d9c9a5);
         box-shadow: 0 20px 38px color-mix(in srgb, rgba(0, 0, 0, 0.3) 80%, transparent);
     }

@@ -35,9 +35,7 @@
 
     const setLocaleFromStorage = () => {
         const storedLocale =
-            typeof localStorage !== "undefined"
-                ? localStorage.getItem("vd_locale")
-                : null;
+            typeof localStorage !== "undefined" ? localStorage.getItem("vd_locale") : null;
         if (storedLocale && allowedLocales.has(storedLocale as Locale)) {
             locale = storedLocale as Locale;
         } else {
@@ -48,19 +46,12 @@
     onMount(() => {
         if (typeof window === "undefined") return;
         setLocaleFromStorage();
-        const stored =
-            typeof localStorage !== "undefined"
-                ? localStorage.getItem("theme")
-                : null;
+        const stored = typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
         const prefersDark =
             typeof matchMedia !== "undefined" &&
             window.matchMedia("(prefers-color-scheme: dark)").matches;
         const next =
-            stored === "light" || stored === "dark"
-                ? stored
-                : prefersDark
-                  ? "dark"
-                  : "light";
+            stored === "light" || stored === "dark" ? stored : prefersDark ? "dark" : "light";
         theme = next as Theme;
         document.documentElement.dataset.theme = theme;
         document.body.dataset.theme = theme;
@@ -86,11 +77,9 @@
     };
 
     const overallProgress =
-        stages.reduce((total, stage) => total + stage.progress, 0) /
-        stages.length;
+        stages.reduce((total, stage) => total + stage.progress, 0) / stages.length;
 
-    const pickLocale = (value: Record<Locale, string>) =>
-        value[locale] ?? value.en;
+    const pickLocale = (value: Record<Locale, string>) => value[locale] ?? value.en;
     $: heroCopy = timelineHero[locale] ?? timelineHero.en;
 
     const resolveStageBackground = (id: string) => {
@@ -133,16 +122,9 @@
         />
         {#each timelineStages as stage}
             {@const side = isMobile ? "right" : stage.side}
-            {@const tone =
-                stage.progress <= 0
-                    ? "idle"
-                    : stage.progress >= 1
-                      ? "done"
-                      : "active"}
+            {@const tone = stage.progress <= 0 ? "idle" : stage.progress >= 1 ? "done" : "active"}
             <div class={`timeline-row ${side}`}>
-                <div
-                    class={`card-slot ${side === "left" ? "has-card left" : ""}`}
-                >
+                <div class={`card-slot ${side === "left" ? "has-card left" : ""}`}>
                     {#if side === "left"}
                         <TimelineCard
                             stageId={stage.id}
@@ -161,9 +143,7 @@
                         <span class="marker-core"></span>
                     </div>
                 </div>
-                <div
-                    class={`card-slot ${side === "right" ? "has-card right" : ""}`}
-                >
+                <div class={`card-slot ${side === "right" ? "has-card right" : ""}`}>
                     {#if side === "right"}
                         <TimelineCard
                             stageId={stage.id}
@@ -197,21 +177,10 @@
         gap: 0.7rem;
         padding: 2rem 2.2rem;
         border-radius: 24px;
-        background: radial-gradient(
-                circle at 12% 20%,
-                var(--glow-gold),
-                transparent 55%
-            ),
-            radial-gradient(
-                circle at 82% 16%,
-                var(--glow-purple),
-                transparent 50%
-            ),
-            linear-gradient(
-                150deg,
-                var(--panel-veil-1),
-                var(--panel-veil-2)
-            );
+        background:
+            radial-gradient(circle at 12% 20%, var(--glow-gold), transparent 55%),
+            radial-gradient(circle at 82% 16%, var(--glow-purple), transparent 50%),
+            linear-gradient(150deg, var(--panel-veil-1), var(--panel-veil-2));
         border: 1px solid var(--outline-strong);
         box-shadow: 0 24px 50px var(--shadow-strong);
     }
@@ -246,7 +215,10 @@
         border: 1px solid var(--outline-soft);
         background: var(--surface-soft);
         cursor: pointer;
-        transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+        transition:
+            transform 120ms ease,
+            box-shadow 120ms ease,
+            border-color 120ms ease;
         color: var(--text);
     }
 

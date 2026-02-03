@@ -5,7 +5,7 @@
     import MobileMenu from "$lib/components/Menu/MobileMenu.svelte";
     import type { Level, Locale, Question } from "$lib/types";
     import { onMount } from "svelte";
-    import { homeUiText } from "./content";
+    import { homeLandingText, homeUiText } from "./content";
     import { eras } from "$lib/common/eras";
 
     export let data: {
@@ -41,12 +41,11 @@
     let flags: Record<Locale, string> = Object.fromEntries(
         locales.map((l) => [l.id, l.flag ?? ""]),
     ) as Record<Locale, string>;
-    const languages: { id: Locale; label: string; name: string }[] =
-        locales.map((l) => ({
-            id: l.id,
-            label: l.label,
-            name: l.name,
-        }));
+    const languages: { id: Locale; label: string; name: string }[] = locales.map((l) => ({
+        id: l.id,
+        label: l.label,
+        name: l.name,
+    }));
     let levels: Level[] = data.levels ?? [];
 
     type Theme = "light" | "dark";
@@ -64,7 +63,7 @@
     $: currentTexts = uiText[locale] ?? uiText.en ?? {};
     let t = (key: string) => currentTexts[key] ?? key;
     $: t = (key: string) => currentTexts[key] ?? key;
-    $: landing = landingText[locale] ?? landingText.en;
+    $: landing = homeLandingText[locale] ?? homeLandingText.en;
 
     const markVisited = () => {
         if (typeof localStorage !== "undefined") {
@@ -104,86 +103,19 @@
         goto(`/quiz?category=${id}`);
     };
 
-    const landingText = {
-        en: {
-            eyebrow: "New journey",
-            title: "Pick your path through Scripture",
-            body: "Choose the full timeline for a guided story, or dive into a focused category.",
-            sectionLabel: "Timeline or era",
-            timelineTitle: "Full timeline",
-            timelineBody:
-                "Journey from Creation to the early Church with a curated sequence of questions.",
-            startTimeline: "Start timeline",
-            viewTimeline: "View timeline",
-            startPrefix: "Start",
-            guidedLabel: "Guided",
-        },
-        es: {
-            eyebrow: "Nuevo viaje",
-            title: "Elige tu camino por la Escritura",
-            body: "Elige la línea del tiempo completa para una historia guiada, o entra en una categoría.",
-            sectionLabel: "Línea del tiempo o era",
-            timelineTitle: "Línea del tiempo",
-            timelineBody:
-                "Viaja desde la Creación hasta la Iglesia primitiva con una secuencia guiada.",
-            startTimeline: "Iniciar línea",
-            viewTimeline: "Ver línea del tiempo",
-            startPrefix: "Iniciar",
-            guidedLabel: "Guiada",
-        },
-        pt: {
-            eyebrow: "Nova jornada",
-            title: "Escolha seu caminho pelas Escrituras",
-            body: "Escolha a linha do tempo completa para uma história guiada, ou foque em uma categoria.",
-            sectionLabel: "Linha do tempo ou era",
-            timelineTitle: "Linha do tempo",
-            timelineBody:
-                "Siga da Criação à Igreja primitiva com uma sequência guiada de perguntas.",
-            startTimeline: "Iniciar linha",
-            viewTimeline: "Ver linha do tempo",
-            startPrefix: "Iniciar",
-            guidedLabel: "Guiada",
-        },
-        sv: {
-            eyebrow: "Ny resa",
-            title: "Välj din väg genom Skriften",
-            body: "Välj hela tidslinjen för en guidad berättelse, eller fördjupa dig i en kategori.",
-            sectionLabel: "Tidslinje eller era",
-            timelineTitle: "Hela tidslinjen",
-            timelineBody:
-                "Färdas från Skapelsen till den tidiga kyrkan med en guidad följd av frågor.",
-            startTimeline: "Starta tidslinje",
-            viewTimeline: "Visa tidslinjen",
-            startPrefix: "Starta",
-            guidedLabel: "Guidad",
-        },
-    } as const;
-
     onMount(() => {
         const updateIsMobile = () => {
-            isMobile =
-                typeof window !== "undefined"
-                    ? window.innerWidth <= 768
-                    : false;
+            isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
         };
         updateIsMobile();
-        const stored =
-            typeof localStorage !== "undefined"
-                ? localStorage.getItem("theme")
-                : null;
+        const stored = typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
         const storedLocale =
-            typeof localStorage !== "undefined"
-                ? localStorage.getItem("vd_locale")
-                : null;
+            typeof localStorage !== "undefined" ? localStorage.getItem("vd_locale") : null;
         const prefersDark =
             typeof matchMedia !== "undefined" &&
             window.matchMedia("(prefers-color-scheme: dark)").matches;
         const next =
-            stored === "light" || stored === "dark"
-                ? stored
-                : prefersDark
-                  ? "dark"
-                  : "light";
+            stored === "light" || stored === "dark" ? stored : prefersDark ? "dark" : "light";
         applyTheme(next as Theme);
         if (storedLocale && languages.some((item) => item.id === storedLocale)) {
             locale = storedLocale as Locale;
@@ -227,7 +159,7 @@
             title={t("title")}
             subtitle={t("subtitle")}
             progressLabel={`${t("question")} 0 ${t("of")} ${totalQuestions}`}
-            progressStage={progressStage}
+            {progressStage}
             {progressPercent}
             {theme}
         >
@@ -267,14 +199,14 @@
         </header>
 
         <p class="section-label">{landing.sectionLabel}</p>
-        <div class="categories-grid">
-            <article class="category-card timeline">
+        <div class="eras-grid">
+            <article class="era-card timeline">
                 <div>
-                    <p class="category-title">
+                    <p class="era-title">
                         {landing.timelineTitle}
                         <span class="pill">{landing.guidedLabel}</span>
                     </p>
-                    <p class="category-body">
+                    <p class="era-body">
                         {landing.timelineBody}
                     </p>
                 </div>
@@ -283,19 +215,16 @@
                 </button>
             </article>
             {#each eras as category}
-                <article class="category-card">
+                <article class="era-card">
                     <div>
-                        <p class="category-title">
+                        <p class="era-title">
                             {category.title[locale] ?? category.title.en}
                         </p>
-                        <p class="category-body">
+                        <p class="era-body">
                             {category.body[locale] ?? category.body.en}
                         </p>
                     </div>
-                    <button
-                        class="ghost"
-                        on:click={() => startCategory(category.id)}
-                    >
+                    <button class="ghost" on:click={() => startCategory(category.id)}>
                         {landing.startPrefix}
                         {category.title[locale] ?? category.title.en}
                     </button>
@@ -359,41 +288,19 @@
         padding: 2.1rem;
         border-radius: 26px;
         border: 1px solid rgba(205, 162, 92, 0.24);
-        background: radial-gradient(
-                circle at 12% 12%,
-                rgba(255, 221, 160, 0.25),
-                transparent 48%
-            ),
-            radial-gradient(
-                circle at 90% 18%,
-                rgba(118, 146, 186, 0.16),
-                transparent 55%
-            ),
-            linear-gradient(
-                155deg,
-                rgba(255, 251, 242, 0.98),
-                rgba(238, 225, 202, 0.92)
-            );
+        background:
+            radial-gradient(circle at 12% 12%, rgba(255, 221, 160, 0.25), transparent 48%),
+            radial-gradient(circle at 90% 18%, rgba(118, 146, 186, 0.16), transparent 55%),
+            linear-gradient(155deg, rgba(255, 251, 242, 0.98), rgba(238, 225, 202, 0.92));
         box-shadow: 0 18px 40px var(--shadow-strong);
         overflow: hidden;
     }
 
     .page.dark-theme .landing {
-        background: radial-gradient(
-                circle at 12% 12%,
-                rgba(255, 206, 133, 0.16),
-                transparent 48%
-            ),
-            radial-gradient(
-                circle at 88% 16%,
-                rgba(120, 152, 196, 0.14),
-                transparent 55%
-            ),
-            linear-gradient(
-                150deg,
-                rgba(12, 16, 28, 0.98),
-                rgba(18, 24, 40, 0.94)
-            );
+        background:
+            radial-gradient(circle at 12% 12%, rgba(255, 206, 133, 0.16), transparent 48%),
+            radial-gradient(circle at 88% 16%, rgba(120, 152, 196, 0.14), transparent 55%),
+            linear-gradient(150deg, rgba(12, 16, 28, 0.98), rgba(18, 24, 40, 0.94));
         border-color: rgba(201, 157, 86, 0.22);
     }
 
@@ -487,7 +394,7 @@
         z-index: 1;
     }
 
-    .categories-grid {
+    .eras-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 1.1rem;
@@ -496,70 +403,48 @@
     }
 
     @media (min-width: 900px) and (max-width: 1199px) {
-        .categories-grid {
+        .eras-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
 
     @media (min-width: 1200px) {
-        .categories-grid {
+        .eras-grid {
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
     }
 
-    .category-card {
+    .era-card {
         display: grid;
         gap: 1rem;
         padding: 1.35rem 1.4rem;
         border-radius: 18px;
         border: 1px solid rgba(130, 106, 60, 0.18);
-        background: linear-gradient(
-            160deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(246, 237, 219, 0.92)
-        );
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(246, 237, 219, 0.92));
         box-shadow: 0 14px 30px var(--shadow-soft);
         min-height: 190px;
     }
 
-    .page.dark-theme .category-card {
-        background: linear-gradient(
-            150deg,
-            rgba(13, 17, 29, 0.96),
-            rgba(22, 26, 42, 0.92)
-        );
+    .page.dark-theme .era-card {
+        background: linear-gradient(150deg, rgba(13, 17, 29, 0.96), rgba(22, 26, 42, 0.92));
         border-color: rgba(200, 160, 95, 0.18);
     }
 
-    .category-card.timeline {
-        background: radial-gradient(
-                circle at 18% 18%,
-                rgba(255, 214, 138, 0.2),
-                transparent 55%
-            ),
-            linear-gradient(
-                160deg,
-                rgba(255, 252, 245, 0.97),
-                rgba(243, 232, 212, 0.92)
-            );
+    .era-card.timeline {
+        background:
+            radial-gradient(circle at 18% 18%, rgba(255, 214, 138, 0.2), transparent 55%),
+            linear-gradient(160deg, rgba(255, 252, 245, 0.97), rgba(243, 232, 212, 0.92));
         border-color: rgba(213, 170, 94, 0.45);
     }
 
-    .page.dark-theme .category-card.timeline {
-        background: radial-gradient(
-                circle at 18% 18%,
-                rgba(255, 197, 117, 0.18),
-                transparent 55%
-            ),
-            linear-gradient(
-                150deg,
-                rgba(16, 20, 32, 0.96),
-                rgba(20, 26, 42, 0.92)
-            );
+    .page.dark-theme .era-card.timeline {
+        background:
+            radial-gradient(circle at 18% 18%, rgba(255, 197, 117, 0.18), transparent 55%),
+            linear-gradient(150deg, rgba(16, 20, 32, 0.96), rgba(20, 26, 42, 0.92));
         border-color: rgba(233, 178, 86, 0.35);
     }
 
-    .category-title {
+    .era-title {
         margin: 0 0 0.35rem;
         font-weight: 700;
         letter-spacing: 0.01em;
@@ -569,7 +454,7 @@
         font-size: 1.05rem;
     }
 
-    .category-body {
+    .era-body {
         margin: 0;
         color: var(--text-muted);
         line-height: 1.45;
@@ -620,7 +505,7 @@
             padding: 1.6rem;
         }
 
-        .category-title {
+        .era-title {
             flex-wrap: wrap;
         }
     }

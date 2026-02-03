@@ -76,11 +76,7 @@
     .torso {
         width: 4px;
         height: 32px;
-        background: linear-gradient(
-            180deg,
-            var(--figure-primary),
-            var(--figure-secondary)
-        );
+        background: linear-gradient(180deg, var(--figure-primary), var(--figure-secondary));
         border-radius: 999px;
         position: absolute;
         top: var(--torso-top);

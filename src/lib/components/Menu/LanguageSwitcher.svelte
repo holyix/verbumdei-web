@@ -9,15 +9,12 @@
         pt: "🇧🇷",
         sv: "🇸🇪",
     };
-    export let selectLanguage: (id: Locale) => void;
+    export let selectLanguage: (_id: Locale) => void;
 </script>
 
 <div class="lang-grid" aria-label="Language selector">
     {#each languages as lang}
-        <button
-            class:active={locale === lang.id}
-            on:click={() => selectLanguage(lang.id)}
-        >
+        <button class:active={locale === lang.id} on:click={() => selectLanguage(lang.id)}>
             <span class="flag" aria-hidden="true">{flags[lang.id]}</span>
             <span>{lang.name}</span>
             <span class="lang-code">{lang.label}</span>

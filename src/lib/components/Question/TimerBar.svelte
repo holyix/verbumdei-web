@@ -4,10 +4,7 @@
 </script>
 
 <div class="answer-timer" aria-label="Progress to next question">
-    <div
-        class="answer-timer-bar"
-        style={`width: ${(timeLeft / duration) * 100}%`}
-    ></div>
+    <div class="answer-timer-bar" style={`width: ${(timeLeft / duration) * 100}%`}></div>
     <slot />
 </div>
 

@@ -1,6 +1,17 @@
 import type { Locale } from "$lib/types";
 
-export const welcomeText: Record<Locale, Record<string, string>> = {
+export type WelcomeText = {
+    eyebrow: string;
+    title: string;
+    bodyOne: string;
+    bodyTwo: string;
+    start: string;
+    showAlways: string;
+    languageLabel: string;
+    languagePrompt: string;
+};
+
+export const welcomeText: Record<Locale, WelcomeText> = {
     en: {
         eyebrow: "The Good News!",
         title: "Welcome to Verbum Quest",

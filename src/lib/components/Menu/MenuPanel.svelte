@@ -28,7 +28,7 @@
         pt: "🇧🇷",
         sv: "🇸🇪",
     };
-    export let selectLanguage: (id: Locale) => void;
+    export let selectLanguage: (_id: Locale) => void;
 
     let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -88,23 +88,17 @@
                     <div class="menu-section">
                         <div class="menu-label">{accountLabel}</div>
                         <button class="menu-item">{loginLabel}</button>
-                        <button class="menu-item muted">{guestPrefLabel}</button
-                        >
+                        <button class="menu-item muted">{guestPrefLabel}</button>
                     </div>
-                <div class="menu-section">
-                    <div class="menu-label">{exploreLabel}</div>
-                    <button class="menu-item" type="button" on:click={goToWelcome}>
-                        {welcomeIntroLabel}
-                    </button>
-                </div>
-                <div class="menu-section">
-                    <div class="menu-label">{languageLabel}</div>
-                    <LanguageSwitcher
-                            {languages}
-                            {locale}
-                            {flags}
-                            {selectLanguage}
-                        />
+                    <div class="menu-section">
+                        <div class="menu-label">{exploreLabel}</div>
+                        <button class="menu-item" type="button" on:click={goToWelcome}>
+                            {welcomeIntroLabel}
+                        </button>
+                    </div>
+                    <div class="menu-section">
+                        <div class="menu-label">{languageLabel}</div>
+                        <LanguageSwitcher {languages} {locale} {flags} {selectLanguage} />
                     </div>
                 </div>
             {/if}
