@@ -1,19 +1,21 @@
 <script lang="ts">
-    import TimelineCard from "$lib/components/Timeline/TimelineCard.svelte";
     import StickFigure from "$lib/components/StickFigure/StickFigure.svelte";
     import { browser } from "$app/environment";
     import { goto } from "$app/navigation";
-    import { onMount, onDestroy } from "svelte";
-    import type { Locale } from "$lib/types";
-    import { stages, timelineHero } from "./content";
+    import { onDestroy, onMount } from "svelte";
+    import type { Era, EraEpisode, Locale } from "$lib/types";
+    import { timelineHero } from "./content";
 
-    const timelineStages = [...stages].reverse();
+    export let data: { eras: Era[] };
+
     let isMobile = false;
     let mobileQuery: MediaQueryList | null = null;
     type Theme = "light" | "dark";
     let theme: Theme = "dark";
     let locale: Locale = "en";
+    let eras: Era[] = data.eras ?? [];
     const allowedLocales = new Set<Locale>(["en", "es", "pt", "sv"]);
+
     if (browser) {
         const storedLocale = localStorage.getItem("vd_locale");
         if (storedLocale && allowedLocales.has(storedLocale as Locale)) {
@@ -21,8 +23,12 @@
         }
     }
 
-    const startStage = (id: string) => {
+    const startEra = (id: string) => {
         goto(`/quiz?category=${id}`);
+    };
+
+    const startEpisode = (eraId: string, episodeId: string) => {
+        goto(`/quiz?category=${eraId}&episode=${episodeId}`);
     };
 
     const goHome = () => {
@@ -42,6 +48,31 @@
             locale = "en";
         }
     };
+
+    type TimelineEntry =
+        | { kind: "era"; era: Era; side: "left" | "right" }
+        | { kind: "episode"; era: Era; episode: EraEpisode; side: "left" | "right" };
+
+    const buildTimelineEntries = (items: Era[]): TimelineEntry[] => {
+        const entries: Omit<TimelineEntry, "side">[] = [];
+        for (const era of items) {
+            entries.push({ kind: "era", era });
+            for (const episode of era.episodes) {
+                entries.push({ kind: "episode", era, episode });
+            }
+        }
+
+        return entries.map((entry, index) => ({
+            ...entry,
+            side: index % 2 === 0 ? "left" : "right",
+        }));
+    };
+
+    $: entries = buildTimelineEntries(eras);
+    $: overallProgress = entries.length > 1 ? (entries.length - 1) / entries.length : 0;
+    $: hasEntries = entries.length > 0;
+    const pickLocale = (value: Record<Locale, string>) => value[locale] ?? value.en;
+    $: heroCopy = timelineHero[locale] ?? timelineHero.en;
 
     onMount(() => {
         if (typeof window === "undefined") return;
@@ -67,28 +98,6 @@
             window.removeEventListener("storage", setLocaleFromStorage);
         }
     });
-
-    const stageBackgrounds: Record<string, string> = {
-        creation: "/illustrations/question-creation.svg",
-        christ: "/illustrations/question-christ.svg",
-        church: "/illustrations/question-church.svg",
-        exodus: "/illustrations/question-covenant.svg",
-        kings: "/illustrations/quest-hero.svg",
-    };
-
-    const overallProgress =
-        stages.reduce((total, stage) => total + stage.progress, 0) / stages.length;
-
-    const pickLocale = (value: Record<Locale, string>) => value[locale] ?? value.en;
-    $: heroCopy = timelineHero[locale] ?? timelineHero.en;
-
-    const resolveStageBackground = (id: string) => {
-        const base = stageBackgrounds[id] ?? "/illustrations/quest-hero.svg";
-        if (theme === "light" && base.includes("quest-hero")) {
-            return "/illustrations/quest-hero-light.svg";
-        }
-        return base;
-    };
 </script>
 
 <main class={`page ${theme === "light" ? "light-theme" : "dark-theme"}`}>
@@ -120,45 +129,103 @@
             torsoTop={36}
             armsTop={44}
         />
-        {#each timelineStages as stage}
-            {@const side = isMobile ? "right" : stage.side}
-            {@const tone = stage.progress <= 0 ? "idle" : stage.progress >= 1 ? "done" : "active"}
+        {#each entries as entry}
+            {@const side = isMobile ? "right" : entry.side}
             <div class={`timeline-row ${side}`}>
                 <div class={`card-slot ${side === "left" ? "has-card left" : ""}`}>
                     {#if side === "left"}
-                        <TimelineCard
-                            stageId={stage.id}
-                            title={pickLocale(stage.title)}
-                            era={pickLocale(stage.era)}
-                            summary={pickLocale(stage.summary)}
-                            progress={stage.progress}
-                            offset={stage.offset}
-                            bgImage={resolveStageBackground(stage.id)}
-                            on:click={() => startStage(stage.id)}
-                        />
+                        {#if entry.kind === "era"}
+                            <article class="story-card era-card">
+                                <p class="card-tag">{heroCopy.eraTag}</p>
+                                <h3>{pickLocale(entry.era.label)}</h3>
+                                <p class="summary">{pickLocale(entry.era.name)}</p>
+                                {#if entry.era.episodes.length}
+                                    <div class="episode-list">
+                                        {#each entry.era.episodes.slice(0, 3) as episode}
+                                            <span>{pickLocale(episode.label)}</span>
+                                        {/each}
+                                    </div>
+                                {/if}
+                                <button
+                                    class="ghost"
+                                    type="button"
+                                    aria-label={`${heroCopy.startEra}: ${pickLocale(entry.era.label)}`}
+                                    on:click={() => startEra(entry.era.id)}
+                                >
+                                    {heroCopy.startEra}
+                                </button>
+                            </article>
+                        {:else}
+                            <article class="story-card episode-card">
+                                <p class="card-tag">{heroCopy.episodeTag}</p>
+                                <h3>{pickLocale(entry.episode.label)}</h3>
+                                <p class="summary">{pickLocale(entry.era.label)}</p>
+                                <button
+                                    class="ghost ghost-episode"
+                                    type="button"
+                                    aria-label={`${heroCopy.startEpisode}: ${pickLocale(entry.episode.label)}`}
+                                    on:click={() => startEpisode(entry.era.id, entry.episode.id)}
+                                >
+                                    {heroCopy.startEpisode}
+                                </button>
+                            </article>
+                        {/if}
                     {/if}
                 </div>
                 <div class="marker-wrap" aria-hidden="true">
-                    <div class={`marker ${tone}`}>
+                    <div class={`marker ${entry.kind === "era" ? "active" : "idle"}`}>
                         <span class="marker-core"></span>
                     </div>
                 </div>
                 <div class={`card-slot ${side === "right" ? "has-card right" : ""}`}>
                     {#if side === "right"}
-                        <TimelineCard
-                            stageId={stage.id}
-                            title={pickLocale(stage.title)}
-                            era={pickLocale(stage.era)}
-                            summary={pickLocale(stage.summary)}
-                            progress={stage.progress}
-                            offset={stage.offset}
-                            bgImage={resolveStageBackground(stage.id)}
-                            on:click={() => startStage(stage.id)}
-                        />
+                        {#if entry.kind === "era"}
+                            <article class="story-card era-card">
+                                <p class="card-tag">{heroCopy.eraTag}</p>
+                                <h3>{pickLocale(entry.era.label)}</h3>
+                                <p class="summary">{pickLocale(entry.era.name)}</p>
+                                {#if entry.era.episodes.length}
+                                    <div class="episode-list">
+                                        {#each entry.era.episodes.slice(0, 3) as episode}
+                                            <span>{pickLocale(episode.label)}</span>
+                                        {/each}
+                                    </div>
+                                {/if}
+                                <button
+                                    class="ghost"
+                                    type="button"
+                                    aria-label={`${heroCopy.startEra}: ${pickLocale(entry.era.label)}`}
+                                    on:click={() => startEra(entry.era.id)}
+                                >
+                                    {heroCopy.startEra}
+                                </button>
+                            </article>
+                        {:else}
+                            <article class="story-card episode-card">
+                                <p class="card-tag">{heroCopy.episodeTag}</p>
+                                <h3>{pickLocale(entry.episode.label)}</h3>
+                                <p class="summary">{pickLocale(entry.era.label)}</p>
+                                <button
+                                    class="ghost ghost-episode"
+                                    type="button"
+                                    aria-label={`${heroCopy.startEpisode}: ${pickLocale(entry.episode.label)}`}
+                                    on:click={() => startEpisode(entry.era.id, entry.episode.id)}
+                                >
+                                    {heroCopy.startEpisode}
+                                </button>
+                            </article>
+                        {/if}
                     {/if}
                 </div>
             </div>
         {/each}
+        {#if !hasEntries}
+            <article class="story-card era-card empty-card">
+                <p class="card-tag">{heroCopy.eraTag}</p>
+                <h3>{heroCopy.title}</h3>
+                <p class="summary">{heroCopy.body}</p>
+            </article>
+        {/if}
     </section>
 </main>
 
@@ -228,6 +295,11 @@
         box-shadow: 0 10px 18px var(--shadow-soft);
     }
 
+    .hero .icon-link:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
     .hero .icon-link svg {
         width: 20px;
         height: 20px;
@@ -235,7 +307,7 @@
 
     .lede {
         margin: 0;
-        max-width: 520px;
+        max-width: 620px;
         color: var(--text-muted);
         line-height: 1.6;
     }
@@ -243,7 +315,7 @@
     .timeline {
         position: relative;
         display: grid;
-        gap: 2.2rem;
+        gap: 1.5rem;
         padding-top: 4.5rem;
     }
 
@@ -298,6 +370,150 @@
         justify-content: flex-start;
     }
 
+    .story-card {
+        width: 100%;
+        max-width: 420px;
+        border-radius: 18px;
+        border: 1px solid var(--outline-soft);
+        padding: 1.15rem 1.2rem;
+        background: linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2));
+        box-shadow: 0 14px 26px var(--shadow-soft);
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .empty-card {
+        margin: 0 auto;
+    }
+
+    .era-card {
+        padding: 1.35rem 1.35rem 1.25rem;
+        border-color: color-mix(in srgb, var(--accent) 36%, transparent);
+        background:
+            radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 52%),
+            linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2));
+        box-shadow: 0 18px 28px var(--shadow-soft);
+    }
+
+    .era-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 34px var(--shadow-strong);
+    }
+
+    .card-tag {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.62rem;
+        font-weight: 800;
+        color: var(--text-muted);
+    }
+
+    .story-card h3 {
+        margin: 0;
+        font-family: var(--font-display);
+        line-height: 1.25;
+    }
+
+    .era-card h3 {
+        font-size: 1.38rem;
+        line-height: 1.18;
+    }
+
+    .summary {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.94rem;
+    }
+
+    .episode-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .episode-list span {
+        font-size: 0.7rem;
+        border-radius: 999px;
+        border: 1px solid var(--outline-soft);
+        padding: 0.15rem 0.5rem;
+        color: var(--text-muted);
+    }
+
+    .episode-card {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        column-gap: 0.8rem;
+        row-gap: 0.45rem;
+        padding: 0.85rem 1rem 0.85rem 1.05rem;
+        border-radius: 13px;
+        border-left: 4px solid color-mix(in srgb, var(--accent) 54%, transparent);
+        background: linear-gradient(
+            165deg,
+            color-mix(in srgb, var(--card-veil-1) 82%, transparent),
+            color-mix(in srgb, var(--card-veil-2) 72%, transparent)
+        );
+        box-shadow: 0 8px 14px var(--shadow-soft);
+    }
+
+    .episode-card:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--accent) 58%, transparent);
+        box-shadow: 0 11px 16px var(--shadow-soft);
+    }
+
+    .episode-card h3 {
+        font-size: 0.97rem;
+        font-weight: 650;
+    }
+
+    .episode-card .summary {
+        font-size: 0.82rem;
+    }
+
+    .episode-card .ghost {
+        grid-column: 2;
+        grid-row: 1 / span 3;
+        align-self: center;
+        padding: 0.5rem 0.68rem;
+        font-size: 0.78rem;
+    }
+
+    .ghost-episode {
+        background: color-mix(in srgb, var(--accent) 16%, transparent);
+        border-color: color-mix(in srgb, var(--accent) 35%, var(--outline-soft));
+    }
+
+    .ghost-episode:hover {
+        background: color-mix(in srgb, var(--accent) 26%, transparent);
+    }
+
+    .ghost {
+        border: 1px solid var(--outline-soft);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.35);
+        color: var(--text);
+        padding: 0.56rem 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+            transform 120ms ease,
+            border-color 120ms ease,
+            background 120ms ease;
+        justify-self: start;
+    }
+
+    .ghost:hover {
+        transform: translateY(-1px);
+        border-color: var(--accent);
+        background: rgba(255, 214, 138, 0.18);
+    }
+
+    .ghost:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
     .marker-wrap {
         grid-column: 2;
         display: grid;
@@ -315,11 +531,6 @@
         background: var(--panel-veil-1);
         box-shadow: 0 10px 20px var(--shadow-soft);
         --connector-color: var(--outline-strong);
-    }
-
-    .card-slot :global(.stage-card) {
-        max-width: 420px;
-        width: 100%;
     }
 
     .timeline-row.left .marker::before,
@@ -358,15 +569,6 @@
 
     .marker.active .marker-core {
         background: color-mix(in srgb, var(--accent) 95%, transparent);
-    }
-
-    .marker.done {
-        border-color: color-mix(in srgb, var(--success) 80%, transparent);
-        --connector-color: color-mix(in srgb, var(--success) 75%, transparent);
-    }
-
-    .marker.done .marker-core {
-        background: color-mix(in srgb, var(--success) 95%, transparent);
     }
 
     @media (max-width: 900px) {
@@ -423,11 +625,37 @@
             padding-left: 0.8rem;
             padding-right: 0.8rem;
         }
+
+        .episode-card {
+            grid-template-columns: 1fr;
+        }
+
+        .episode-card .ghost {
+            grid-column: auto;
+            grid-row: auto;
+            justify-self: start;
+        }
     }
 
     @media (max-width: 640px) {
         .hero {
             padding: 1.6rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .hero .icon-link,
+        .ghost,
+        .era-card,
+        .episode-card {
+            transition: none;
+        }
+
+        .hero .icon-link:hover,
+        .ghost:hover,
+        .era-card:hover,
+        .episode-card:hover {
+            transform: none;
         }
     }
 </style>

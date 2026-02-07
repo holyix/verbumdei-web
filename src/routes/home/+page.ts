@@ -1,5 +1,6 @@
 import type { PageLoad } from "./$types";
-import type { Level, Locale, Question } from "$lib/types";
+import type { Era, Level, Locale, Question } from "$lib/types";
+import { fetchErasWithEpisodes } from "$lib/api/eras";
 
 const REQUIRED_LOCALES: Locale[] = ["en", "es", "pt", "sv"];
 const LETTERS = "abcdefghijklmnopqrstuvwxyz".split("");
@@ -51,6 +52,16 @@ const mapQuestion = (raw: any, idx: number): Question => {
         image_url: baseImage,
         image_url_light: lightImage,
         image_url_dark: darkImage,
+        eraId: typeof raw?.era_id === "string" ? raw.era_id : undefined,
+        episodeId:
+            typeof raw?.episode_id === "string"
+                ? raw.episode_id
+                : typeof raw?.episode === "string"
+                  ? raw.episode
+                  : undefined,
+        tags: Array.isArray(raw?.tags)
+            ? raw.tags.filter((tag: unknown): tag is string => typeof tag === "string")
+            : undefined,
     };
 };
 
@@ -58,6 +69,7 @@ export const load: PageLoad = async ({ fetch }) => {
     let questions: Question[] = [];
     let locales: { id: Locale; label: string; name: string; flag?: string }[] = [];
     let levels: Level[] = [];
+    let eras: Era[] = [];
 
     try {
         const res = await fetch(`${API_BASE}/v1/questions`);
@@ -96,6 +108,13 @@ export const load: PageLoad = async ({ fetch }) => {
         console.error("Failed to fetch levels", err);
     }
 
+    // fetch eras + episodes
+    try {
+        eras = await fetchErasWithEpisodes(fetch, API_BASE);
+    } catch (err) {
+        console.error("Failed to fetch eras", err);
+    }
+
     // fallbacks if API missing
     if (!locales.length) {
         locales = [
@@ -109,5 +128,5 @@ export const load: PageLoad = async ({ fetch }) => {
         levels = [];
     }
 
-    return { questions, locales, levels };
+    return { questions, locales, levels, eras };
 };

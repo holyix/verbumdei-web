@@ -16,6 +16,26 @@ export type Question = {
     image_url?: string;
     image_url_light?: string;
     image_url_dark?: string;
+    eraId?: string;
+    episodeId?: string;
+    tags?: string[];
 };
 
 export type Level = { id: string; label: Record<Locale, string> };
+
+export type EraEpisode = {
+    id: string;
+    name: Record<Locale, string>;
+    label: Record<Locale, string>;
+    referenceCount: number;
+};
+
+export type Era = {
+    id: string;
+    name: Record<Locale, string>;
+    label: Record<Locale, string>;
+    type?: string;
+    episodeCount: number;
+    books: Record<Locale, string[]>;
+    episodes: EraEpisode[];
+};

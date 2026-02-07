@@ -3,15 +3,15 @@
     import { goto } from "$app/navigation";
     import MenuPanel from "$lib/components/Menu/MenuPanel.svelte";
     import MobileMenu from "$lib/components/Menu/MobileMenu.svelte";
-    import type { Level, Locale, Question } from "$lib/types";
+    import type { Era, EraEpisode, Level, Locale, Question } from "$lib/types";
     import { onMount } from "svelte";
     import { homeLandingText, homeUiText } from "./content";
-    import { eras } from "$lib/common/eras";
 
     export let data: {
         questions: Question[];
         locales: { id: Locale; label: string; name: string; flag?: string }[];
         levels: Level[];
+        eras: Era[];
     };
 
     let questions: Question[] = data.questions ?? [];
@@ -47,6 +47,7 @@
         name: l.name,
     }));
     let levels: Level[] = data.levels ?? [];
+    let eras: Era[] = data.eras ?? [];
 
     type Theme = "light" | "dark";
 
@@ -102,6 +103,40 @@
         markVisited();
         goto(`/quiz?category=${id}`);
     };
+
+    const startEpisode = (eraId: string, episodeId: string) => {
+        markVisited();
+        goto(`/quiz?category=${eraId}&episode=${episodeId}`);
+    };
+
+    type MixedCard =
+        | { kind: "era"; era: Era }
+        | { kind: "episode"; era: Era; episode: EraEpisode };
+
+    const buildMixedCards = (items: Era[]): MixedCard[] => {
+        const mixed: MixedCard[] = [];
+        const leftovers: { era: Era; episode: EraEpisode }[] = [];
+
+        for (const era of items) {
+            mixed.push({ kind: "era", era });
+            const [first, ...rest] = era.episodes;
+            if (first) {
+                mixed.push({ kind: "episode", era, episode: first });
+            }
+            for (const episode of rest) {
+                leftovers.push({ era, episode });
+            }
+        }
+
+        for (const item of leftovers) {
+            mixed.push({ kind: "episode", era: item.era, episode: item.episode });
+        }
+
+        return mixed;
+    };
+
+    $: mixedCards = buildMixedCards(eras);
+    $: hasCards = mixedCards.length > 0;
 
     onMount(() => {
         const updateIsMobile = () => {
@@ -210,26 +245,70 @@
                         {landing.timelineBody}
                     </p>
                 </div>
-                <button class="ghost" on:click={startTimeline}>
+                <button
+                    class="ghost"
+                    type="button"
+                    aria-label={landing.startTimeline}
+                    on:click={startTimeline}
+                >
                     {landing.startTimeline}
                 </button>
             </article>
-            {#each eras as category}
-                <article class="era-card">
-                    <div>
-                        <p class="era-title">
-                            {category.title[locale] ?? category.title.en}
-                        </p>
+            {#each mixedCards as card}
+                {#if card.kind === "era"}
+                    <article class="era-card era-wide">
+                        <div class="era-top">
+                            <p class="era-title">
+                                {card.era.label[locale] ?? card.era.label.en}
+                            </p>
+                            <p class="era-meta">
+                                {card.era.episodeCount} {landing.episodeCountLabel}
+                            </p>
+                        </div>
                         <p class="era-body">
-                            {category.body[locale] ?? category.body.en}
+                            {card.era.name[locale] ?? card.era.name.en}
                         </p>
-                    </div>
-                    <button class="ghost" on:click={() => startCategory(category.id)}>
-                        {landing.startPrefix}
-                        {category.title[locale] ?? category.title.en}
-                    </button>
-                </article>
+                        {#if card.era.episodes.length}
+                            <div class="episode-chips">
+                                {#each card.era.episodes.slice(0, 3) as episode}
+                                    <span>{episode.label[locale] ?? episode.label.en}</span>
+                                {/each}
+                            </div>
+                        {/if}
+                        <button
+                            class="ghost"
+                            type="button"
+                            aria-label={`${landing.startPrefix} ${card.era.label[locale] ?? card.era.label.en}`}
+                            on:click={() => startCategory(card.era.id)}
+                        >
+                            {`${landing.startPrefix} ${card.era.label[locale] ?? card.era.label.en}`}
+                        </button>
+                    </article>
+                {:else}
+                    <article class="episode-card">
+                        <div>
+                            <p class="episode-kicker">{card.era.label[locale] ?? card.era.label.en}</p>
+                            <p class="episode-title">
+                                {card.episode.label[locale] ?? card.episode.label.en}
+                            </p>
+                        </div>
+                        <button
+                            class="ghost ghost-episode"
+                            type="button"
+                            aria-label={`${landing.startEpisode}: ${card.episode.label[locale] ?? card.episode.label.en}`}
+                            on:click={() => startEpisode(card.era.id, card.episode.id)}
+                        >
+                            {landing.startEpisode}
+                        </button>
+                    </article>
+                {/if}
             {/each}
+            {#if !hasCards}
+                <article class="era-card empty-card">
+                    <p class="era-title">{landing.sectionLabel}</p>
+                    <p class="era-body">{landing.timelineBody}</p>
+                </article>
+            {/if}
         </div>
     </section>
 </main>
@@ -364,6 +443,11 @@
         box-shadow: 0 14px 24px var(--shadow-soft);
     }
 
+    .timeline-link:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
     .landing-eyebrow {
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -425,6 +509,122 @@
         min-height: 190px;
     }
 
+    .era-wide {
+        grid-column: span 2;
+        min-height: 236px;
+        padding: 1.65rem 1.7rem;
+        border-color: rgba(212, 166, 95, 0.34);
+        background:
+            radial-gradient(circle at 14% 14%, rgba(255, 220, 153, 0.26), transparent 50%),
+            linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(245, 233, 210, 0.94));
+        box-shadow: 0 22px 36px var(--shadow-soft);
+    }
+
+    .era-wide:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 26px 40px var(--shadow-strong);
+    }
+
+    .page.dark-theme .era-wide {
+        background:
+            radial-gradient(circle at 14% 14%, rgba(255, 200, 112, 0.18), transparent 50%),
+            linear-gradient(152deg, rgba(15, 20, 34, 0.98), rgba(25, 31, 49, 0.94));
+        border-color: rgba(228, 176, 92, 0.35);
+    }
+
+    .era-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .era-meta {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        border: 1px solid var(--outline-soft);
+        border-radius: 999px;
+        padding: 0.18rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .episode-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .episode-chips span {
+        font-size: 0.72rem;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid var(--outline-soft);
+        color: var(--text-muted);
+        background: var(--surface-soft);
+    }
+
+    .episode-card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.85rem 0.95rem 0.85rem 1.05rem;
+        border-radius: 12px;
+        border: 1px solid rgba(130, 106, 60, 0.18);
+        border-left: 4px solid color-mix(in srgb, var(--accent) 55%, transparent);
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.9), rgba(243, 233, 214, 0.88));
+        box-shadow: 0 8px 16px var(--shadow-soft);
+        min-height: 108px;
+    }
+
+    .episode-card:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+        box-shadow: 0 12px 18px var(--shadow-soft);
+    }
+
+    .empty-card {
+        grid-column: 1 / -1;
+    }
+
+    .page.dark-theme .episode-card {
+        background: linear-gradient(155deg, rgba(16, 19, 32, 0.94), rgba(23, 28, 44, 0.9));
+        border-color: rgba(200, 160, 95, 0.18);
+    }
+
+    .episode-kicker {
+        margin: 0 0 0.18rem;
+        text-transform: uppercase;
+        letter-spacing: 0.11em;
+        font-size: 0.63rem;
+        color: var(--text-muted);
+    }
+
+    .episode-title {
+        margin: 0;
+        font-weight: 650;
+        line-height: 1.28;
+        font-size: 0.89rem;
+    }
+
+    .episode-card .ghost {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    .ghost-episode {
+        background: color-mix(in srgb, var(--accent) 16%, transparent);
+        border-color: color-mix(in srgb, var(--accent) 35%, var(--outline-soft));
+    }
+
+    .ghost-episode:hover {
+        background: color-mix(in srgb, var(--accent) 26%, transparent);
+    }
+
     .page.dark-theme .era-card {
         background: linear-gradient(150deg, rgba(13, 17, 29, 0.96), rgba(22, 26, 42, 0.92));
         border-color: rgba(200, 160, 95, 0.18);
@@ -446,12 +646,17 @@
 
     .era-title {
         margin: 0 0 0.35rem;
-        font-weight: 700;
+        font-weight: 800;
         letter-spacing: 0.01em;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-size: 1.05rem;
+        font-size: 1.14rem;
+    }
+
+    .era-wide .era-title {
+        font-size: 1.34rem;
+        line-height: 1.2;
     }
 
     .era-body {
@@ -478,6 +683,11 @@
         transform: translateY(-1px);
         border-color: var(--accent);
         background: rgba(255, 214, 138, 0.22);
+    }
+
+    .ghost:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
     }
 
     .page.dark-theme .ghost:hover {
@@ -507,6 +717,36 @@
 
         .era-title {
             flex-wrap: wrap;
+        }
+
+        .era-wide {
+            grid-column: span 1;
+        }
+
+        .episode-card {
+            grid-template-columns: 1fr;
+            gap: 0.65rem;
+            min-height: 0;
+        }
+
+        .episode-card .ghost {
+            justify-self: start;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ghost,
+        .timeline-link,
+        .era-card,
+        .episode-card {
+            transition: none;
+        }
+
+        .ghost:hover,
+        .timeline-link:hover,
+        .era-wide:hover,
+        .episode-card:hover {
+            transform: none;
         }
     }
 </style>

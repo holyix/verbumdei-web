@@ -51,8 +51,26 @@ const mapQuestion = (raw: any, idx: number): Question => {
         image_url: baseImage,
         image_url_light: lightImage,
         image_url_dark: darkImage,
+        eraId: typeof raw?.era_id === "string" ? raw.era_id : undefined,
+        episodeId:
+            typeof raw?.episode_id === "string"
+                ? raw.episode_id
+                : typeof raw?.episode === "string"
+                  ? raw.episode
+                  : undefined,
+        tags: Array.isArray(raw?.tags)
+            ? raw.tags.filter((tag: unknown): tag is string => typeof tag === "string")
+            : undefined,
     };
 };
+
+const normalizeKey = (value: string) =>
+    value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
 const toCategory = (label: string) => {
     const normalized = label.toLowerCase().trim();
@@ -64,11 +82,30 @@ const toCategory = (label: string) => {
     return null;
 };
 
+const matchesCategory = (question: Question, category: string) => {
+    const normalizedCategory = normalizeKey(category);
+    if (!normalizedCategory) return true;
+    if (normalizeKey(question.eraId ?? "") === normalizedCategory) return true;
+
+    const label = question.stage.en ?? "";
+    const fallback = toCategory(label);
+    if (fallback === normalizedCategory) return true;
+    return normalizeKey(label).includes(normalizedCategory);
+};
+
+const matchesEpisode = (question: Question, episode: string) => {
+    const normalizedEpisode = normalizeKey(episode);
+    if (!normalizedEpisode) return true;
+    if (normalizeKey(question.episodeId ?? "") === normalizedEpisode) return true;
+    return (question.tags ?? []).some((tag) => normalizeKey(tag) === normalizedEpisode);
+};
+
 export const load: PageLoad = async ({ fetch, url }) => {
     let questions: Question[] = [];
     let locales: { id: Locale; label: string; name: string; flag?: string }[] = [];
     let levels: Level[] = [];
     const activeCategory = url.searchParams.get("category");
+    const activeEpisode = url.searchParams.get("episode");
 
     try {
         const res = await fetch(`${API_BASE}/v1/questions`);
@@ -121,10 +158,12 @@ export const load: PageLoad = async ({ fetch, url }) => {
     }
 
     if (activeCategory) {
-        const filtered = questions.filter((question) => {
-            const label = question.stage.en ?? "";
-            return toCategory(label) === activeCategory;
-        });
+        const filtered = questions.filter((question) => matchesCategory(question, activeCategory));
+        questions = filtered.length ? filtered : questions;
+    }
+
+    if (activeEpisode) {
+        const filtered = questions.filter((question) => matchesEpisode(question, activeEpisode));
         questions = filtered.length ? filtered : questions;
     }
 

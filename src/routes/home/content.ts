@@ -21,6 +21,8 @@ export type LandingText = {
     viewTimeline: string;
     startPrefix: string;
     guidedLabel: string;
+    episodeCountLabel: string;
+    startEpisode: string;
 };
 
 export const homeLandingText: Record<Locale, LandingText> = {
@@ -36,6 +38,8 @@ export const homeLandingText: Record<Locale, LandingText> = {
         viewTimeline: "View timeline",
         startPrefix: "Start",
         guidedLabel: "Guided",
+        episodeCountLabel: "episodes",
+        startEpisode: "Start episode",
     },
     es: {
         eyebrow: "Nuevo viaje",
@@ -49,6 +53,8 @@ export const homeLandingText: Record<Locale, LandingText> = {
         viewTimeline: "Ver línea del tiempo",
         startPrefix: "Iniciar",
         guidedLabel: "Guiada",
+        episodeCountLabel: "episodios",
+        startEpisode: "Iniciar episodio",
     },
     pt: {
         eyebrow: "Nova jornada",
@@ -61,6 +67,8 @@ export const homeLandingText: Record<Locale, LandingText> = {
         viewTimeline: "Ver linha do tempo",
         startPrefix: "Iniciar",
         guidedLabel: "Guiada",
+        episodeCountLabel: "episódios",
+        startEpisode: "Iniciar episódio",
     },
     sv: {
         eyebrow: "Ny resa",
@@ -73,5 +81,7 @@ export const homeLandingText: Record<Locale, LandingText> = {
         viewTimeline: "Visa tidslinjen",
         startPrefix: "Starta",
         guidedLabel: "Guidad",
+        episodeCountLabel: "episoder",
+        startEpisode: "Starta episod",
     },
 };
