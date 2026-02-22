@@ -16,6 +16,7 @@
     let locale: Locale = "en";
     let eras: Era[] = data.eras ?? [];
     const allowedLocales = new Set<Locale>(["en", "es", "pt", "sv"]);
+    const MAX_ORDER = Number.MAX_SAFE_INTEGER;
 
     if (browser) {
         const storedLocale = localStorage.getItem("vd_locale");
@@ -54,9 +55,32 @@
         | { kind: "era"; era: Era; side: "left" | "right" }
         | { kind: "episode"; era: Era; episode: EraEpisode; side: "left" | "right" };
 
+    const eraComparator = (a: Era, b: Era) => {
+        const aIsMeta = a.type === "meta";
+        const bIsMeta = b.type === "meta";
+        if (aIsMeta !== bIsMeta) return aIsMeta ? 1 : -1;
+        const ao = Number.isFinite(a.order) ? a.order : MAX_ORDER;
+        const bo = Number.isFinite(b.order) ? b.order : MAX_ORDER;
+        return ao - bo || a.id.localeCompare(b.id);
+    };
+
+    const episodeComparator = (a: EraEpisode, b: EraEpisode) => {
+        const ao = Number.isFinite(a.order) ? a.order : MAX_ORDER;
+        const bo = Number.isFinite(b.order) ? b.order : MAX_ORDER;
+        return ao - bo || a.id.localeCompare(b.id);
+    };
+
+    const sortedEras = (items: Era[]): Era[] =>
+        [...items]
+            .map((era) => ({
+                ...era,
+                episodes: [...era.episodes].sort(episodeComparator),
+            }))
+            .sort(eraComparator);
+
     const buildTimelineEntries = (items: Era[]): TimelineEntry[] => {
         const entries: Omit<TimelineEntry, "side">[] = [];
-        for (const era of items) {
+        for (const era of sortedEras(items)) {
             entries.push({ kind: "era", era });
             for (const episode of era.episodes) {
                 entries.push({ kind: "episode", era, episode });

@@ -1,6 +1,39 @@
 import type { Era, EraEpisode, Locale } from "$lib/types";
 
 const REQUIRED_LOCALES: Locale[] = ["en", "es", "pt", "sv"];
+const MAX_ORDER = Number.MAX_SAFE_INTEGER;
+
+const DEFAULT_ERA_ORDER: Record<string, number> = {
+    creation: 10,
+    origins: 20,
+    patriarchs: 30,
+    exodus: 40,
+    settlement: 50,
+    kings: 60,
+    psalms: 70,
+    wisdom: 80,
+    prophets: 90,
+    exile: 100,
+    gospel: 110,
+    church: 120,
+    messianics: 130,
+};
+
+const DEFAULT_EPISODE_ORDER: Record<string, Record<string, number>> = {
+    creation: { world: 10, humanity: 20 },
+    origins: { "the-fall": 10, "cain-abel": 20, noah: 30, babel: 40 },
+    patriarchs: { abraham: 10, isaac: 20, jacob: 30, joseph: 40 },
+    exodus: { moses: 10, "exodus-event": 20, sinai: 30, wilderness: 40 },
+    settlement: { joshua: 10, judges: 20 },
+    kings: { saul: 10, david: 20, solomon: 30 },
+    psalms: { lament: 10, praise: 20, kingship: 30 },
+    wisdom: { suffering: 10, virtue: 20, meaning: 30 },
+    prophets: { division: 10, commission: 20, repentance: 30 },
+    exile: { exile: 10, daniel: 20, esther: 30, return: 40, maccabees: 50 },
+    gospel: { incarnation: 10, mary: 20, ministry: 30, passion: 40, resurrection: 50 },
+    church: { pentecost: 10, apostles: 20, paul: 30, letters: 40, revelation: 50 },
+    messianics: {},
+};
 
 type RawEraListItem = {
     id?: string;
@@ -37,6 +70,14 @@ const fetchJson = async (fetchFn: typeof fetch, url: string) => {
     if (!res.ok) return null;
     return res.json();
 };
+
+const resolveEraOrder = (eraId: string, rawOrder?: number) =>
+    typeof rawOrder === "number" ? rawOrder : (DEFAULT_ERA_ORDER[eraId] ?? MAX_ORDER);
+
+const resolveEpisodeOrder = (eraId: string, episodeId: string, rawOrder?: number) =>
+    typeof rawOrder === "number"
+        ? rawOrder
+        : (DEFAULT_EPISODE_ORDER[eraId]?.[episodeId] ?? MAX_ORDER);
 
 const eraComparator = (a: Era, b: Era) => {
     const aIsMeta = a.type === "meta";
@@ -76,7 +117,7 @@ export const fetchErasWithEpisodes = async (
             if (!erasMap.has(eraId)) {
                 erasMap.set(eraId, {
                     id: eraId,
-                    order: typeof item.order === "number" ? item.order : Number.MAX_SAFE_INTEGER,
+                    order: resolveEraOrder(eraId, item.order),
                     name: emptyLocales(),
                     label: emptyLocales(),
                     type: item.type,
@@ -92,9 +133,7 @@ export const fetchErasWithEpisodes = async (
             if (!era.type && typeof item.type === "string") {
                 era.type = item.type;
             }
-            if (typeof item.order === "number") {
-                era.order = item.order;
-            }
+            era.order = resolveEraOrder(eraId, item.order);
             if (typeof item.episode_count === "number") {
                 era.episodeCount = Math.max(era.episodeCount, item.episode_count);
             }
@@ -131,7 +170,7 @@ export const fetchErasWithEpisodes = async (
             if (!episodesMap.has(episodeId)) {
                 episodesMap.set(episodeId, {
                     id: episodeId,
-                    order: typeof item.order === "number" ? item.order : Number.MAX_SAFE_INTEGER,
+                    order: resolveEpisodeOrder(eraId, episodeId, item.order),
                     name: emptyLocales(),
                     label: emptyLocales(),
                     referenceCount:
@@ -142,9 +181,7 @@ export const fetchErasWithEpisodes = async (
             const episode = episodesMap.get(episodeId)!;
             mergeLocalized(episode.name, locale, item.name);
             mergeLocalized(episode.label, locale, item.label);
-            if (typeof item.order === "number") {
-                episode.order = item.order;
-            }
+            episode.order = resolveEpisodeOrder(eraId, episodeId, item.order);
             if (typeof item.reference_count === "number") {
                 episode.referenceCount = Math.max(episode.referenceCount, item.reference_count);
             }

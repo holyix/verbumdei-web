@@ -1,4 +1,21 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8080";
+const MAX_ORDER = Number.MAX_SAFE_INTEGER;
+
+const DEFAULT_ERA_ORDER: Record<string, number> = {
+    creation: 10,
+    origins: 20,
+    patriarchs: 30,
+    exodus: 40,
+    settlement: 50,
+    kings: 60,
+    psalms: 70,
+    wisdom: 80,
+    prophets: 90,
+    exile: 100,
+    gospel: 110,
+    church: 120,
+    messianics: 130,
+};
 
 export type EraSummary = {
     id: string;
@@ -56,7 +73,9 @@ const sortEras = (eras: EraSummary[]) =>
         if (aIsMeta !== bIsMeta) {
             return aIsMeta ? 1 : -1;
         }
-        return a.order - b.order || a.id.localeCompare(b.id);
+        const ao = Number.isFinite(a.order) ? a.order : (DEFAULT_ERA_ORDER[a.id] ?? MAX_ORDER);
+        const bo = Number.isFinite(b.order) ? b.order : (DEFAULT_ERA_ORDER[b.id] ?? MAX_ORDER);
+        return ao - bo || a.id.localeCompare(b.id);
     });
 
 const sortEpisodes = (episodes: EpisodeListItem[]) =>
