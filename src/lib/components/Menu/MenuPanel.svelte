@@ -20,6 +20,8 @@
     export let toggleMenu: () => void;
     export let theme: "light" | "dark";
     export let toggleTheme: () => void;
+    export let automaticTheme = false;
+    export let setAutomaticTheme: (_enabled: boolean) => void;
     export let languages: { id: Locale; label: string; name: string }[] = [];
     export let locale: Locale;
     export let flags: Record<Locale, string> = {
@@ -83,7 +85,12 @@
                 >
                     <div class="menu-section">
                         <div class="menu-label">{styleLabel}</div>
-                        <ThemeToggle {theme} toggle={toggleTheme} />
+                        <ThemeToggle
+                            {theme}
+                            toggle={toggleTheme}
+                            automatic={automaticTheme}
+                            setAutomatic={setAutomaticTheme}
+                        />
                     </div>
                     <div class="menu-section">
                         <div class="menu-label">{accountLabel}</div>

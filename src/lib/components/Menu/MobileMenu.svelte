@@ -28,6 +28,8 @@
     export let selectLanguage: (_id: Locale) => void;
     export let theme: "light" | "dark";
     export let toggleTheme: () => void;
+    export let automaticTheme = false;
+    export let setAutomaticTheme: (_enabled: boolean) => void;
 
     const goToWelcome = () => {
         goto("/welcome");
@@ -49,7 +51,13 @@
                 <span></span>
             </span>
         </button>
-        <ThemeToggle {theme} toggle={toggleTheme} showText={false} />
+        <ThemeToggle
+            {theme}
+            toggle={toggleTheme}
+            automatic={automaticTheme}
+            setAutomatic={setAutomaticTheme}
+            showText={false}
+        />
         {#if menuOpen}
             <div class="menu-dropdown mobile" id="user-menu">
                 <div class="mobile-profile stacked">
@@ -60,7 +68,12 @@
                 </div>
                 <div class="menu-section">
                     <div class="menu-label">{styleLabel}</div>
-                    <ThemeToggle {theme} toggle={toggleTheme} />
+                    <ThemeToggle
+                        {theme}
+                        toggle={toggleTheme}
+                        automatic={automaticTheme}
+                        setAutomatic={setAutomaticTheme}
+                    />
                 </div>
                 <div class="menu-section">
                     <div class="menu-label">{accountLabel}</div>

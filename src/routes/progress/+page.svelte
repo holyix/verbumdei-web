@@ -2,6 +2,7 @@
     import Hero from "$lib/components/Hero/Hero.svelte";
     import MenuPanel from "$lib/components/Menu/MenuPanel.svelte";
     import StickFigure from "$lib/components/StickFigure/StickFigure.svelte";
+    import { onMount } from "svelte";
     import type { Locale } from "$lib/types";
 
     export let data: {
@@ -38,6 +39,8 @@
 
     type Theme = "light" | "dark";
     let theme: Theme = "dark";
+    let manualTheme: Theme = "dark";
+    let automaticTheme = false;
     let menuOpen = false;
     let locale: Locale = "en";
     const labels = {
@@ -77,12 +80,66 @@
     $: heroPercent = Math.round((overallEpisodePercent + overallQuestionPercent) / 2);
 
     const toggleMenu = () => (menuOpen = !menuOpen);
-    const toggleTheme = () => (theme = theme === "dark" ? "light" : "dark");
+    const getSystemTheme = (): Theme => {
+        if (typeof window === "undefined" || typeof matchMedia === "undefined") return "dark";
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    };
+
+    const applyTheme = (value: Theme) => {
+        theme = value;
+        if (typeof document !== "undefined") {
+            document.documentElement.dataset.theme = value;
+            document.body.dataset.theme = value;
+        }
+    };
+
+    const setAutomaticTheme = (enabled: boolean) => {
+        automaticTheme = enabled;
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("theme_auto", enabled ? "1" : "0");
+        }
+        if (enabled) {
+            applyTheme(getSystemTheme());
+        } else {
+            applyTheme(manualTheme);
+        }
+    };
+
+    const toggleTheme = () => {
+        manualTheme = manualTheme === "dark" ? "light" : "dark";
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("theme", manualTheme);
+        }
+        if (automaticTheme) {
+            automaticTheme = false;
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem("theme_auto", "0");
+            }
+        }
+        applyTheme(manualTheme);
+    };
 
     const selectLanguage = (id: Locale) => {
         locale = id;
         menuOpen = false;
     };
+
+    onMount(() => {
+        const stored = typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
+        const storedAuto =
+            typeof localStorage !== "undefined" ? localStorage.getItem("theme_auto") : null;
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const system = getSystemTheme();
+        manualTheme = stored === "light" || stored === "dark" ? stored : system;
+        automaticTheme = storedAuto === "1";
+        applyTheme(automaticTheme ? system : manualTheme);
+        const handleSystemThemeChange = () => {
+            if (!automaticTheme) return;
+            applyTheme(getSystemTheme());
+        };
+        mediaQuery.addEventListener("change", handleSystemThemeChange);
+        return () => mediaQuery.removeEventListener("change", handleSystemThemeChange);
+    });
 </script>
 
 <main class="progress-page">
@@ -115,6 +172,8 @@
             {toggleMenu}
             {theme}
             {toggleTheme}
+            {automaticTheme}
+            {setAutomaticTheme}
             {selectLanguage}
         />
     </Hero>

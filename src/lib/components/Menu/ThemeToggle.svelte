@@ -1,6 +1,8 @@
 <script lang="ts">
     export let theme: "light" | "dark";
     export let toggle: () => void;
+    export let automatic = false;
+    export let setAutomatic: (_enabled: boolean) => void;
     export let showText = true;
 
     let modeText: string;
@@ -12,27 +14,45 @@
 </script>
 
 <div class:compact={!showText} class="theme-toggle">
+    <div class="theme-row">
+        {#if showText}
+            <span class="label">{modeText}</span>
+        {/if}
+        <button
+            class="toggle"
+            aria-label={ariaLabel}
+            title={ariaLabel}
+            aria-pressed={isLight}
+            on:click={toggle}
+        >
+            <span class="icon moon" aria-hidden="true">🌙</span>
+            <span class="track" aria-hidden="true">
+                <span class:light={isLight} class="thumb"></span>
+            </span>
+            <span class="icon sun" aria-hidden="true">☀️</span>
+        </button>
+    </div>
     {#if showText}
-        <span class="label">{modeText}</span>
+        <label class="automatic-row">
+            <span>Automatic</span>
+            <input
+                type="checkbox"
+                checked={automatic}
+                on:change={(event) => setAutomatic((event.currentTarget as HTMLInputElement).checked)}
+            />
+        </label>
     {/if}
-    <button
-        class="toggle"
-        aria-label={ariaLabel}
-        title={ariaLabel}
-        aria-pressed={isLight}
-        on:click={toggle}
-    >
-        <span class="icon moon" aria-hidden="true">🌙</span>
-        <span class="track" aria-hidden="true">
-            <span class:light={isLight} class="thumb"></span>
-        </span>
-        <span class="icon sun" aria-hidden="true">☀️</span>
-    </button>
     <slot />
 </div>
 
 <style>
     .theme-toggle {
+        display: grid;
+        gap: 0.45rem;
+        width: 100%;
+    }
+
+    .theme-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -41,6 +61,10 @@
     }
 
     .theme-toggle.compact {
+        gap: 0;
+    }
+
+    .theme-toggle.compact .theme-row {
         justify-content: flex-end;
         gap: 0.4rem;
     }
@@ -71,6 +95,22 @@
         transform: translateY(-1px);
         border-color: var(--accent);
         box-shadow: 0 8px 18px var(--shadow-soft);
+    }
+
+    .automatic-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-subtle);
+        font-size: 0.84rem;
+        font-weight: 600;
+    }
+
+    .automatic-row input {
+        accent-color: var(--accent);
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
     }
 
     .icon {

@@ -74,6 +74,8 @@
     let answerTimer: ReturnType<typeof setTimeout> | null = null;
     let answerInterval: ReturnType<typeof setInterval> | null = null;
     let theme: Theme = "dark";
+    let manualTheme: Theme = "dark";
+    let automaticTheme = false;
 
     $: {
         if (questions.length && currentIndex > questions.length - 1) {
@@ -216,18 +218,44 @@
     };
     const toggleMenu = () => (menuOpen = !menuOpen);
 
+    const getSystemTheme = (): Theme => {
+        if (typeof window === "undefined" || typeof matchMedia === "undefined") return "dark";
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    };
+
     const applyTheme = (value: Theme) => {
         theme = value;
         if (typeof document !== "undefined") {
             document.documentElement.dataset.theme = value;
             document.body.dataset.theme = value;
         }
+    };
+
+    const setAutomaticTheme = (enabled: boolean) => {
+        automaticTheme = enabled;
         if (typeof localStorage !== "undefined") {
-            localStorage.setItem("theme", value);
+            localStorage.setItem("theme_auto", enabled ? "1" : "0");
+        }
+        if (enabled) {
+            applyTheme(getSystemTheme());
+        } else {
+            applyTheme(manualTheme);
         }
     };
 
-    const toggleTheme = () => applyTheme(theme === "dark" ? "light" : "dark");
+    const toggleTheme = () => {
+        manualTheme = manualTheme === "dark" ? "light" : "dark";
+        if (typeof localStorage !== "undefined") {
+            localStorage.setItem("theme", manualTheme);
+        }
+        if (automaticTheme) {
+            automaticTheme = false;
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem("theme_auto", "0");
+            }
+        }
+        applyTheme(manualTheme);
+    };
 
     let isMobile = false;
 
@@ -237,20 +265,29 @@
         };
         updateIsMobile();
         const stored = typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
+        const storedAuto =
+            typeof localStorage !== "undefined" ? localStorage.getItem("theme_auto") : null;
         const storedLocale =
             typeof localStorage !== "undefined" ? localStorage.getItem("vd_locale") : null;
-        const prefersDark =
-            typeof matchMedia !== "undefined" &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const next =
-            stored === "light" || stored === "dark" ? stored : prefersDark ? "dark" : "light";
-        applyTheme(next as Theme);
+        const system = getSystemTheme();
+        manualTheme = stored === "light" || stored === "dark" ? stored : system;
+        automaticTheme = storedAuto === "1";
+        applyTheme(automaticTheme ? system : manualTheme);
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleSystemThemeChange = () => {
+            if (!automaticTheme) return;
+            applyTheme(getSystemTheme());
+        };
         if (storedLocale && languages.some((item) => item.id === storedLocale)) {
             locale = storedLocale as Locale;
         }
         markVisited();
         window.addEventListener("resize", updateIsMobile);
-        return () => window.removeEventListener("resize", updateIsMobile);
+        mediaQuery.addEventListener("change", handleSystemThemeChange);
+        return () => {
+            window.removeEventListener("resize", updateIsMobile);
+            mediaQuery.removeEventListener("change", handleSystemThemeChange);
+        };
     });
 
     onDestroy(() => clearAnswerTimer());
@@ -266,6 +303,8 @@
         {toggleMenu}
         {theme}
         {toggleTheme}
+        {automaticTheme}
+        {setAutomaticTheme}
         title={t("profile")}
         username={t("guestName")}
         levelLabel={t("score")}
@@ -313,6 +352,8 @@
                 {toggleMenu}
                 {theme}
                 {toggleTheme}
+                {automaticTheme}
+                {setAutomaticTheme}
                 {selectLanguage}
             />
         </Hero>
