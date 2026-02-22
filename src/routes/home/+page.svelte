@@ -290,6 +290,12 @@
         },
     ];
 
+    $: timelineEpisodeCount = primeEras.reduce((sum, era) => sum + era.episodes.length, 0);
+    $: timelinePreviewEpisodes = primeEras
+        .flatMap((era) => era.episodes)
+        .slice(0, 3);
+    $: timelineQuestionCount = timelineEpisodeCount;
+
     onMount(() => {
         const updateIsMobile = () => {
             isMobile = typeof window !== "undefined" ? window.innerWidth <= 768 : false;
@@ -420,23 +426,39 @@
         <p id="collections-section" class="section-label">{landing.sectionLabel}</p>
         <div class="eras-grid prime-grid">
             <article class="era-card timeline">
-                <div>
+                <div class="era-top">
                     <p class="era-title">
                         {landing.timelineTitle}
                         <span class="pill">{landing.guidedLabel}</span>
                     </p>
+                    <p class="era-meta">
+                        {timelineEpisodeCount} {landing.episodeCountLabel}
+                    </p>
+                </div>
+                <div>
                     <p class="era-body">
                         {landing.timelineBody}
                     </p>
                 </div>
-                <button
-                    class="ghost"
-                    type="button"
-                    aria-label={landing.startTimeline}
-                    on:click={startTimeline}
-                >
-                    {landing.startTimeline}
-                </button>
+                <div class="episode-chips">
+                    {#each timelinePreviewEpisodes as episode}
+                        <span>{episode.label[locale] ?? episode.label.en}</span>
+                    {/each}
+                    <span>...</span>
+                </div>
+                <div class="collection-footer">
+                    <p class="collection-questions">{timelineQuestionCount} questions</p>
+                    <button
+                        class="ghost collection-play"
+                        type="button"
+                        aria-label={landing.startTimeline}
+                        on:click={startTimeline}
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8 6.5v11l9-5.5z" />
+                        </svg>
+                    </button>
+                </div>
             </article>
             {#each primeEras as era}
                 <article class="era-card">
@@ -458,14 +480,19 @@
                             {/each}
                         </div>
                     {/if}
-                    <button
-                        class="ghost"
-                        type="button"
-                        aria-label={`${landing.startPrefix} ${era.label[locale] ?? era.label.en}`}
-                        on:click={() => startCategory(era.id)}
-                    >
-                        {`${landing.startPrefix} ${era.label[locale] ?? era.label.en}`}
-                    </button>
+                    <div class="collection-footer">
+                        <p class="collection-questions">{era.episodeCount} questions</p>
+                        <button
+                            class="ghost collection-play"
+                            type="button"
+                            aria-label={`${landing.startPrefix} ${era.label[locale] ?? era.label.en}`}
+                            on:click={() => startCategory(era.id)}
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M8 6.5v11l9-5.5z" />
+                            </svg>
+                        </button>
+                    </div>
                 </article>
             {/each}
         </div>
@@ -1252,6 +1279,37 @@
     .ghost:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 2px;
+    }
+
+    .collection-play {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        justify-self: start;
+        background: var(--surface-soft);
+    }
+
+    .collection-play svg {
+        width: 15px;
+        height: 15px;
+        fill: var(--accent);
+    }
+
+    .collection-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: auto;
+    }
+
+    .collection-questions {
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--text-muted);
     }
 
     .page.dark-theme .ghost:hover {
