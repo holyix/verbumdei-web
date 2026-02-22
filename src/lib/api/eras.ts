@@ -6,6 +6,7 @@ type RawEraListItem = {
     id?: string;
     name?: string;
     label?: string;
+    order?: number;
     type?: string;
     episode_count?: number;
 };
@@ -14,6 +15,7 @@ type RawEpisodeListItem = {
     id?: string;
     name?: string;
     label?: string;
+    order?: number;
     reference_count?: number;
 };
 
@@ -35,6 +37,18 @@ const fetchJson = async (fetchFn: typeof fetch, url: string) => {
     if (!res.ok) return null;
     return res.json();
 };
+
+const eraComparator = (a: Era, b: Era) => {
+    const aIsMeta = a.type === "meta";
+    const bIsMeta = b.type === "meta";
+    if (aIsMeta !== bIsMeta) {
+        return aIsMeta ? 1 : -1;
+    }
+    return a.order - b.order || a.id.localeCompare(b.id);
+};
+
+const episodeComparator = (a: EraEpisode, b: EraEpisode) =>
+    a.order - b.order || a.id.localeCompare(b.id);
 
 export const fetchErasWithEpisodes = async (
     fetchFn: typeof fetch,
@@ -62,6 +76,7 @@ export const fetchErasWithEpisodes = async (
             if (!erasMap.has(eraId)) {
                 erasMap.set(eraId, {
                     id: eraId,
+                    order: typeof item.order === "number" ? item.order : Number.MAX_SAFE_INTEGER,
                     name: emptyLocales(),
                     label: emptyLocales(),
                     type: item.type,
@@ -76,6 +91,9 @@ export const fetchErasWithEpisodes = async (
             mergeLocalized(era.label, locale, item.label);
             if (!era.type && typeof item.type === "string") {
                 era.type = item.type;
+            }
+            if (typeof item.order === "number") {
+                era.order = item.order;
             }
             if (typeof item.episode_count === "number") {
                 era.episodeCount = Math.max(era.episodeCount, item.episode_count);
@@ -113,6 +131,7 @@ export const fetchErasWithEpisodes = async (
             if (!episodesMap.has(episodeId)) {
                 episodesMap.set(episodeId, {
                     id: episodeId,
+                    order: typeof item.order === "number" ? item.order : Number.MAX_SAFE_INTEGER,
                     name: emptyLocales(),
                     label: emptyLocales(),
                     referenceCount:
@@ -123,16 +142,20 @@ export const fetchErasWithEpisodes = async (
             const episode = episodesMap.get(episodeId)!;
             mergeLocalized(episode.name, locale, item.name);
             mergeLocalized(episode.label, locale, item.label);
+            if (typeof item.order === "number") {
+                episode.order = item.order;
+            }
             if (typeof item.reference_count === "number") {
                 episode.referenceCount = Math.max(episode.referenceCount, item.reference_count);
             }
         }
 
-        era.episodes = Array.from(episodesMap.values()).sort((a, b) => a.id.localeCompare(b.id));
+        era.episodes = Array.from(episodesMap.values()).sort(episodeComparator);
         era.episodeCount = Math.max(era.episodeCount, era.episodes.length);
     }
 
     return orderedEraIds
         .map((id) => erasMap.get(id))
-        .filter((item): item is Era => !!item);
+        .filter((item): item is Era => !!item)
+        .sort(eraComparator);
 };

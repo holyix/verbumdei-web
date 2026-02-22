@@ -156,6 +156,7 @@
     const primeEras: Era[] = [
         {
             id: "old-testament",
+            order: 10,
             label: {
                 en: "Old Testament",
                 es: "Antiguo Testamento",
@@ -173,6 +174,7 @@
             episodes: [
                 {
                     id: "creation",
+                    order: 10,
                     label: {
                         en: "Creation",
                         es: "Creación",
@@ -189,6 +191,7 @@
                 },
                 {
                     id: "patriarchs",
+                    order: 20,
                     label: {
                         en: "Patriarchs",
                         es: "Patriarcas",
@@ -205,6 +208,7 @@
                 },
                 {
                     id: "prophets",
+                    order: 30,
                     label: {
                         en: "Prophets",
                         es: "Profetas",
@@ -223,6 +227,7 @@
         },
         {
             id: "new-testament",
+            order: 20,
             label: {
                 en: "New Testament",
                 es: "Nuevo Testamento",
@@ -240,6 +245,7 @@
             episodes: [
                 {
                     id: "gospels",
+                    order: 10,
                     label: {
                         en: "Gospels",
                         es: "Evangelios",
@@ -256,6 +262,7 @@
                 },
                 {
                     id: "acts",
+                    order: 20,
                     label: {
                         en: "Acts",
                         es: "Hechos",
@@ -272,6 +279,7 @@
                 },
                 {
                     id: "letters",
+                    order: 30,
                     label: {
                         en: "Letters",
                         es: "Cartas",
@@ -799,6 +807,22 @@
         margin-bottom: 1.2rem;
     }
 
+    .prime-grid .era-card {
+        grid-template-rows: auto auto auto auto;
+        align-content: start;
+    }
+
+    .prime-grid .era-body {
+        min-height: 2.8em;
+        line-height: 1.35;
+    }
+
+    .prime-grid .episode-chips span {
+        font-size: 0.68rem;
+        min-height: 1.35rem;
+        padding: 0.22rem 0.5rem 0.2rem;
+    }
+
     @media (min-width: 900px) and (max-width: 1199px) {
         .eras-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -875,12 +899,17 @@
     }
 
     .episode-chips span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 0.72rem;
         border-radius: 999px;
-        padding: 0.2rem 0.55rem;
+        line-height: 1;
+        padding: 0.3rem 0.55rem 0.28rem;
         border: 1px solid var(--outline-soft);
         color: var(--text-muted);
         background: var(--surface-soft);
+        min-height: 1.55rem;
     }
 
     .episode-card {

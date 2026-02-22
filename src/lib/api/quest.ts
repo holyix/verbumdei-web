@@ -4,6 +4,7 @@ export type EraSummary = {
     id: string;
     name: string;
     label: string;
+    order: number;
     type?: string;
     episode_count: number;
 };
@@ -12,6 +13,7 @@ export type EraDetail = {
     id: string;
     name: string;
     label: string;
+    order: number;
     type?: string;
     books?: string[];
 };
@@ -20,6 +22,7 @@ export type EpisodeListItem = {
     id: string;
     name: string;
     label: string;
+    order: number;
     reference_count: number;
 };
 
@@ -33,6 +36,7 @@ export type EpisodeDetail = {
     id: string;
     name: string;
     label: string;
+    order: number;
     references?: EpisodeReference[];
 };
 
@@ -45,10 +49,23 @@ const safeJson = async (res: Response) => {
     }
 };
 
+const sortEras = (eras: EraSummary[]) =>
+    eras.sort((a, b) => {
+        const aIsMeta = a.type === "meta";
+        const bIsMeta = b.type === "meta";
+        if (aIsMeta !== bIsMeta) {
+            return aIsMeta ? 1 : -1;
+        }
+        return a.order - b.order || a.id.localeCompare(b.id);
+    });
+
+const sortEpisodes = (episodes: EpisodeListItem[]) =>
+    episodes.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+
 export const fetchEraSummaries = async (fetchFn: typeof fetch): Promise<EraSummary[]> => {
     const res = await fetchFn(`${API_BASE}/v1/eras`);
     const body = await safeJson(res);
-    return Array.isArray(body) ? (body as EraSummary[]) : [];
+    return Array.isArray(body) ? sortEras(body as EraSummary[]) : [];
 };
 
 export const fetchEraDetail = async (
@@ -66,7 +83,7 @@ export const fetchEpisodesForEra = async (
 ): Promise<EpisodeListItem[]> => {
     const res = await fetchFn(`${API_BASE}/v1/eras/${encodeURIComponent(eraId)}/episodes`);
     const body = await safeJson(res);
-    return Array.isArray(body) ? (body as EpisodeListItem[]) : [];
+    return Array.isArray(body) ? sortEpisodes(body as EpisodeListItem[]) : [];
 };
 
 export const fetchEpisodeDetail = async (

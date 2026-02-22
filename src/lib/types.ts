@@ -25,6 +25,7 @@ export type Level = { id: string; label: Record<Locale, string> };
 
 export type EraEpisode = {
     id: string;
+    order: number;
     name: Record<Locale, string>;
     label: Record<Locale, string>;
     referenceCount: number;
@@ -32,6 +33,7 @@ export type EraEpisode = {
 
 export type Era = {
     id: string;
+    order: number;
     name: Record<Locale, string>;
     label: Record<Locale, string>;
     type?: string;
