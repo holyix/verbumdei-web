@@ -1,0 +1,58 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Psalms</title>
+  <desc id="desc">Abstract lyre and open book representing songs and scripture</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8a7452"/>
+      <stop offset="50%" stop-color="#c8ab7a"/>
+      <stop offset="100%" stop-color="#efd6a4"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="24%" r="46%">
+      <stop offset="0%" stop-color="#fff1cd" stop-opacity="0.78"/>
+      <stop offset="100%" stop-color="#ffe8b7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d2a56a"/>
+      <stop offset="100%" stop-color="#8f6337"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff3d8"/>
+      <stop offset="100%" stop-color="#ebd9b2"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="400" fill="url(#bg)"/>
+  <ellipse cx="250" cy="105" rx="220" ry="105" fill="url(#glow)"/>
+
+  <path d="M0 314 Q170 276 336 320 T800 314 L800 400 L0 400 Z" fill="#8d6a42" opacity="0.30"/>
+
+  <!-- Open book -->
+  <g transform="translate(412 238)">
+    <path d="M-124 84 Q-64 32 0 56 Q64 32 124 84 L124 114 Q64 84 0 100 Q-64 84 -124 114 Z" fill="#d4bb86" opacity="0.55"/>
+    <path d="M-120 80 Q-60 26 -2 52 L-2 122 Q-60 94 -120 110 Z" fill="url(#paper)"/>
+    <path d="M2 52 Q60 26 120 80 L120 110 Q60 94 2 122 Z" fill="url(#paper)"/>
+    <path d="M0 50 L0 124" stroke="#c6a46d" stroke-width="3"/>
+    <g stroke="#cdb17f" stroke-width="2" opacity="0.72">
+      <line x1="-96" y1="72" x2="-24" y2="88"/>
+      <line x1="-94" y1="86" x2="-22" y2="100"/>
+      <line x1="24" y1="88" x2="96" y2="72"/>
+      <line x1="22" y1="100" x2="94" y2="86"/>
+    </g>
+  </g>
+
+  <!-- Lyre -->
+  <g transform="translate(270 200)">
+    <path d="M0 22 C-44 22 -68 58 -68 98 C-68 142 -42 176 0 192 C42 176 68 142 68 98 C68 58 44 22 0 22 Z" fill="none" stroke="url(#wood)" stroke-width="16" stroke-linecap="round"/>
+    <path d="M-26 40 C-36 58 -42 78 -42 98 C-42 116 -36 134 -24 148" fill="none" stroke="#b8894f" stroke-width="8" stroke-linecap="round"/>
+    <path d="M26 40 C36 58 42 78 42 98 C42 116 36 134 24 148" fill="none" stroke="#b8894f" stroke-width="8" stroke-linecap="round"/>
+    <rect x="-34" y="164" width="68" height="14" rx="7" fill="#9d6c3c"/>
+    <g stroke="#f3e5c8" stroke-width="2.2" opacity="0.9">
+      <line x1="-22" y1="44" x2="-18" y2="164"/>
+      <line x1="-10" y1="40" x2="-8" y2="164"/>
+      <line x1="0" y1="38" x2="0" y2="164"/>
+      <line x1="10" y1="40" x2="8" y2="164"/>
+      <line x1="22" y1="44" x2="18" y2="164"/>
+    </g>
+  </g>
+</svg>
