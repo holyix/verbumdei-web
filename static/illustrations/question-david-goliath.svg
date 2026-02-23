@@ -1,0 +1,72 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">David and Goliath</title>
+  <desc id="desc">Abstract scene of David with a sling facing Goliath before battle</desc>
+
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2e4a7e"/>
+      <stop offset="55%" stop-color="#6fa2d7"/>
+      <stop offset="100%" stop-color="#f7c980"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d4aa6d"/>
+      <stop offset="100%" stop-color="#9a713f"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="64%" cy="25%" r="28%">
+      <stop offset="0%" stop-color="#ffe6a8" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffe6a8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="400" fill="url(#sky)"/>
+  <ellipse cx="510" cy="110" rx="190" ry="95" fill="url(#sun)"/>
+
+  <path d="M0 305 Q140 272 270 304 Q410 338 540 302 Q680 266 800 300 L800 400 L0 400 Z" fill="url(#ground)"/>
+  <path d="M0 334 Q180 300 360 334 T800 334 L800 400 L0 400 Z" fill="#7f5b34" opacity="0.38"/>
+
+  <g fill="none" stroke="#f6d9a5" stroke-width="2" opacity="0.45">
+    <path d="M110 318 Q145 306 178 319 Q210 332 245 320"/>
+    <path d="M560 320 Q593 307 625 320 Q656 334 690 321"/>
+  </g>
+
+  <!-- Goliath silhouette -->
+  <g fill="#1c120c" opacity="0.96">
+    <circle cx="560" cy="178" r="18"/>
+    <path d="M544 196 L576 196 L588 286 L532 286 Z"/>
+    <path d="M544 206 L510 242 L520 252 L552 218 Z"/>
+    <path d="M576 206 L610 244 L600 254 L568 220 Z"/>
+    <rect x="538" y="286" width="16" height="66" rx="5"/>
+    <rect x="566" y="286" width="16" height="66" rx="5"/>
+  </g>
+  <g stroke="#f4d7a4" stroke-width="1.5" opacity="0.32" fill="none">
+    <line x1="544" y1="196" x2="576" y2="196"/>
+    <line x1="536" y1="286" x2="584" y2="286"/>
+  </g>
+
+  <!-- Spear -->
+  <path d="M610 138 L610 350" stroke="#2a1b12" stroke-width="4" stroke-linecap="round"/>
+  <path d="M605 144 L610 128 L615 144 Z" fill="#d8c39a"/>
+
+  <!-- David silhouette -->
+  <g fill="#1f140d" opacity="0.96">
+    <circle cx="293" cy="245" r="9"/>
+    <path d="M286 254 L300 254 L304 294 L286 294 Z"/>
+    <path d="M286 262 L266 276 L270 283 L290 270 Z"/>
+    <path d="M300 262 L320 257 L322 265 L302 272 Z"/>
+    <rect x="283" y="292" width="9" height="38" rx="4" transform="rotate(10 287.5 311)"/>
+    <rect x="297" y="292" width="9" height="38" rx="4" transform="rotate(-6 301.5 311)"/>
+  </g>
+  <g stroke="#f7dfb5" stroke-width="1.4" opacity="0.35" fill="none">
+    <line x1="286" y1="254" x2="300" y2="254"/>
+  </g>
+
+  <!-- Sling arc and stone -->
+  <path d="M338 252 Q362 214 396 194" fill="none" stroke="#fff2cc" stroke-width="3.2" stroke-linecap="round" opacity="0.92"/>
+  <circle cx="398" cy="194" r="4.2" fill="#fff2cc"/>
+
+  <!-- Tension lines near Goliath -->
+  <g stroke="#f3d7a0" stroke-width="2" opacity="0.45">
+    <line x1="516" y1="185" x2="532" y2="185"/>
+    <line x1="514" y1="195" x2="530" y2="193"/>
+  </g>
+</svg>
