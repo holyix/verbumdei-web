@@ -1,21 +1,40 @@
 <script lang="ts">
+    import TimelineCard from "$lib/components/Timeline/TimelineCard.svelte";
     import StickFigure from "$lib/components/StickFigure/StickFigure.svelte";
     import { browser } from "$app/environment";
-    import { goto } from "$app/navigation";
-    import { onDestroy, onMount } from "svelte";
-    import type { Era, EraEpisode, Locale } from "$lib/types";
+    import { afterNavigate, goto } from "$app/navigation";
+    import { onDestroy, onMount, tick } from "svelte";
+    import type { Era, Locale } from "$lib/types";
     import { timelineHero } from "./content";
 
     export let data: { eras: Era[] };
+
+    type Stage = {
+        id: string;
+        title: string;
+        era: string;
+        summary: string;
+        progress: number;
+        offset: number;
+        side: "left" | "right";
+        bgImage: string;
+    };
 
     let isMobile = false;
     let mobileQuery: MediaQueryList | null = null;
     type Theme = "light" | "dark";
     let theme: Theme = "dark";
+    let manualTheme: Theme = "dark";
+    let automaticTheme = false;
     let locale: Locale = "en";
     let eras: Era[] = data.eras ?? [];
+    let hasAutoScrolled = false;
+    let autoScrollAttempts = 0;
+    let autoScrollTimer: ReturnType<typeof setTimeout> | null = null;
     const allowedLocales = new Set<Locale>(["en", "es", "pt", "sv"]);
     const MAX_ORDER = Number.MAX_SAFE_INTEGER;
+    const MAX_AUTO_SCROLL_ATTEMPTS = 3;
+    const SCROLL_TARGET_TOLERANCE = 6;
 
     if (browser) {
         const storedLocale = localStorage.getItem("vd_locale");
@@ -24,12 +43,14 @@
         }
     }
 
-    const startEra = (id: string) => {
+    const startStage = (id: string) => {
         goto(`/quiz?category=${id}`);
     };
 
-    const startEpisode = (eraId: string, episodeId: string) => {
-        goto(`/quiz?category=${eraId}&episode=${episodeId}`);
+    const scrollToTop = () => {
+        if (typeof window === "undefined") return;
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
     };
 
     const goHome = () => {
@@ -40,7 +61,20 @@
         isMobile = mobileQuery ? mobileQuery.matches : false;
     };
 
-    const setLocaleFromStorage = () => {
+    const getSystemTheme = (): Theme => {
+        if (typeof window === "undefined" || typeof matchMedia === "undefined") return "dark";
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    };
+
+    const applyTheme = (value: Theme) => {
+        theme = value;
+        if (typeof document !== "undefined") {
+            document.documentElement.dataset.theme = value;
+            document.body.dataset.theme = value;
+        }
+    };
+
+    const syncPreferencesFromStorage = () => {
         const storedLocale =
             typeof localStorage !== "undefined" ? localStorage.getItem("vd_locale") : null;
         if (storedLocale && allowedLocales.has(storedLocale as Locale)) {
@@ -48,11 +82,16 @@
         } else {
             locale = "en";
         }
-    };
 
-    type TimelineEntry =
-        | { kind: "era"; era: Era; side: "left" | "right" }
-        | { kind: "episode"; era: Era; episode: EraEpisode; side: "left" | "right" };
+        const storedTheme =
+            typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
+        const storedAuto =
+            typeof localStorage !== "undefined" ? localStorage.getItem("theme_auto") : null;
+        const system = getSystemTheme();
+        manualTheme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : system;
+        automaticTheme = storedAuto === "1";
+        applyTheme(automaticTheme ? system : manualTheme);
+    };
 
     const eraComparator = (a: Era, b: Era) => {
         const aIsMeta = a.type === "meta";
@@ -63,64 +102,124 @@
         return ao - bo || a.id.localeCompare(b.id);
     };
 
-    const episodeComparator = (a: EraEpisode, b: EraEpisode) => {
-        const ao = Number.isFinite(a.order) ? a.order : MAX_ORDER;
-        const bo = Number.isFinite(b.order) ? b.order : MAX_ORDER;
-        return ao - bo || a.id.localeCompare(b.id);
+    const pickLocale = (value: Record<Locale, string>) => value[locale] ?? value.en;
+
+    const resolveStageBackground = (imagePath: string) => {
+        if (theme === "light" && imagePath.includes("quest-hero")) {
+            return "/illustrations/quest-hero-light.svg";
+        }
+        return imagePath;
     };
 
-    const sortedEras = (items: Era[]): Era[] =>
-        [...items]
-            .map((era) => ({
-                ...era,
-                episodes: [...era.episodes].sort(episodeComparator),
-            }))
-            .sort(eraComparator);
+    const resolveEraBackground = (era: Era) => era.imagePath ?? "/illustrations/quest-hero.svg";
 
-    const buildTimelineEntries = (items: Era[]): TimelineEntry[] => {
-        const entries: Omit<TimelineEntry, "side">[] = [];
-        for (const era of sortedEras(items)) {
-            entries.push({ kind: "era", era });
-            for (const episode of era.episodes) {
-                entries.push({ kind: "episode", era, episode });
-            }
-        }
+    const buildStages = (items: Era[], _theme: Theme): Stage[] => {
+        const sorted = [...items].sort(eraComparator);
+        const denominator = Math.max(sorted.length - 1, 1);
 
-        return entries.map((entry, index) => ({
-            ...entry,
+        return sorted.map((era, index) => ({
+            id: era.id,
+            title: pickLocale(era.label),
+            era: pickLocale(era.name),
+            summary: `${era.episodeCount} ${era.episodeCount === 1 ? "episode" : "episodes"}`,
+            progress: sorted.length === 1 ? 1 : index / denominator,
+            offset: 0,
             side: index % 2 === 0 ? "left" : "right",
+            bgImage: resolveStageBackground(resolveEraBackground(era)),
         }));
     };
 
-    $: entries = buildTimelineEntries(eras);
-    $: overallProgress = entries.length > 1 ? (entries.length - 1) / entries.length : 0;
-    $: hasEntries = entries.length > 0;
-    const pickLocale = (value: Record<Locale, string>) => value[locale] ?? value.en;
+    $: stages = buildStages(eras, theme);
+    $: timelineStages = [...stages].reverse();
+    $: overallProgress = stages.length
+        ? stages.reduce((total, stage) => total + stage.progress, 0) / stages.length
+        : 0;
     $: heroCopy = timelineHero[locale] ?? timelineHero.en;
+
+    const autoScrollToFirstIncomplete = async () => {
+        if (hasAutoScrolled || !timelineStages.length || typeof window === "undefined") return;
+        await tick();
+        let targetIndex = -1;
+        for (let index = timelineStages.length - 1; index >= 0; index -= 1) {
+            if (timelineStages[index].progress < 1) {
+                targetIndex = index;
+                break;
+            }
+        }
+        if (targetIndex === -1) {
+            targetIndex = timelineStages.length - 1;
+        }
+        const target = document.querySelector<HTMLElement>(
+            `[data-timeline-index="${targetIndex}"]`,
+        );
+        if (!target) {
+            if (autoScrollAttempts < MAX_AUTO_SCROLL_ATTEMPTS) {
+                autoScrollAttempts += 1;
+                requestAnimationFrame(() => {
+                    void autoScrollToFirstIncomplete();
+                });
+            }
+            return;
+        }
+        const rect = target.getBoundingClientRect();
+        const absoluteTop = window.scrollY + rect.top;
+        const desiredTop = Math.max(0, absoluteTop - window.innerHeight / 2 + rect.height / 2);
+        if (Math.abs(window.scrollY - desiredTop) <= SCROLL_TARGET_TOLERANCE) {
+            hasAutoScrolled = true;
+            return;
+        }
+        const prefersReducedMotion =
+            typeof window !== "undefined" &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({
+            top: desiredTop,
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+        });
+        hasAutoScrolled = true;
+    };
+
+    const scheduleAutoScroll = () => {
+        if (typeof window === "undefined") return;
+        if (autoScrollTimer) {
+            clearTimeout(autoScrollTimer);
+        }
+        autoScrollAttempts = 0;
+        autoScrollTimer = setTimeout(() => {
+            void autoScrollToFirstIncomplete();
+        }, 120);
+    };
 
     onMount(() => {
         if (typeof window === "undefined") return;
-        setLocaleFromStorage();
-        const stored = typeof localStorage !== "undefined" ? localStorage.getItem("theme") : null;
-        const prefersDark =
-            typeof matchMedia !== "undefined" &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const next =
-            stored === "light" || stored === "dark" ? stored : prefersDark ? "dark" : "light";
-        theme = next as Theme;
-        document.documentElement.dataset.theme = theme;
-        document.body.dataset.theme = theme;
+        syncPreferencesFromStorage();
         mobileQuery = window.matchMedia("(max-width: 900px)");
+        const themeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleSystemThemeChange = () => {
+            if (!automaticTheme) return;
+            applyTheme(getSystemTheme());
+        };
         mobileQuery.addEventListener("change", updateMobile);
+        themeMediaQuery.addEventListener("change", handleSystemThemeChange);
         updateMobile();
-        window.addEventListener("storage", setLocaleFromStorage);
+        window.addEventListener("storage", syncPreferencesFromStorage);
+        scheduleAutoScroll();
+
+        afterNavigate(() => {
+            scheduleAutoScroll();
+        });
+
+        return () => {
+            mobileQuery?.removeEventListener("change", updateMobile);
+            themeMediaQuery.removeEventListener("change", handleSystemThemeChange);
+            window.removeEventListener("storage", syncPreferencesFromStorage);
+            if (autoScrollTimer) {
+                clearTimeout(autoScrollTimer);
+            }
+        };
     });
 
     onDestroy(() => {
         mobileQuery?.removeEventListener("change", updateMobile);
-        if (typeof window !== "undefined") {
-            window.removeEventListener("storage", setLocaleFromStorage);
-        }
     });
 </script>
 
@@ -153,103 +252,58 @@
             torsoTop={36}
             armsTop={44}
         />
-        {#each entries as entry}
-            {@const side = isMobile ? "right" : entry.side}
-            <div class={`timeline-row ${side}`}>
+        {#each timelineStages as stage, index}
+            {@const side = isMobile ? "right" : stage.side}
+            {@const tone = stage.progress <= 0 ? "idle" : stage.progress >= 1 ? "done" : "active"}
+            <div class={`timeline-row ${side}`} data-timeline-index={index}>
                 <div class={`card-slot ${side === "left" ? "has-card left" : ""}`}>
                     {#if side === "left"}
-                        {#if entry.kind === "era"}
-                            <article class="story-card era-card">
-                                <p class="card-tag">{heroCopy.eraTag}</p>
-                                <h3>{pickLocale(entry.era.label)}</h3>
-                                <p class="summary">{pickLocale(entry.era.name)}</p>
-                                {#if entry.era.episodes.length}
-                                    <div class="episode-list">
-                                        {#each entry.era.episodes.slice(0, 3) as episode}
-                                            <span>{pickLocale(episode.label)}</span>
-                                        {/each}
-                                    </div>
-                                {/if}
-                                <button
-                                    class="ghost"
-                                    type="button"
-                                    aria-label={`${heroCopy.startEra}: ${pickLocale(entry.era.label)}`}
-                                    on:click={() => startEra(entry.era.id)}
-                                >
-                                    {heroCopy.startEra}
-                                </button>
-                            </article>
-                        {:else}
-                            <article class="story-card episode-card">
-                                <p class="card-tag">{heroCopy.episodeTag}</p>
-                                <h3>{pickLocale(entry.episode.label)}</h3>
-                                <p class="summary">{pickLocale(entry.era.label)}</p>
-                                <button
-                                    class="ghost ghost-episode"
-                                    type="button"
-                                    aria-label={`${heroCopy.startEpisode}: ${pickLocale(entry.episode.label)}`}
-                                    on:click={() => startEpisode(entry.era.id, entry.episode.id)}
-                                >
-                                    {heroCopy.startEpisode}
-                                </button>
-                            </article>
-                        {/if}
+                        <TimelineCard
+                            stageId={stage.id}
+                            title={stage.title}
+                            era={stage.era}
+                            summary={stage.summary}
+                            progress={stage.progress}
+                            offset={stage.offset}
+                            bgImage={stage.bgImage}
+                            on:click={() => startStage(stage.id)}
+                        />
                     {/if}
                 </div>
                 <div class="marker-wrap" aria-hidden="true">
-                    <div class={`marker ${entry.kind === "era" ? "active" : "idle"}`}>
+                    <div class={`marker ${tone}`}>
                         <span class="marker-core"></span>
                     </div>
                 </div>
                 <div class={`card-slot ${side === "right" ? "has-card right" : ""}`}>
                     {#if side === "right"}
-                        {#if entry.kind === "era"}
-                            <article class="story-card era-card">
-                                <p class="card-tag">{heroCopy.eraTag}</p>
-                                <h3>{pickLocale(entry.era.label)}</h3>
-                                <p class="summary">{pickLocale(entry.era.name)}</p>
-                                {#if entry.era.episodes.length}
-                                    <div class="episode-list">
-                                        {#each entry.era.episodes.slice(0, 3) as episode}
-                                            <span>{pickLocale(episode.label)}</span>
-                                        {/each}
-                                    </div>
-                                {/if}
-                                <button
-                                    class="ghost"
-                                    type="button"
-                                    aria-label={`${heroCopy.startEra}: ${pickLocale(entry.era.label)}`}
-                                    on:click={() => startEra(entry.era.id)}
-                                >
-                                    {heroCopy.startEra}
-                                </button>
-                            </article>
-                        {:else}
-                            <article class="story-card episode-card">
-                                <p class="card-tag">{heroCopy.episodeTag}</p>
-                                <h3>{pickLocale(entry.episode.label)}</h3>
-                                <p class="summary">{pickLocale(entry.era.label)}</p>
-                                <button
-                                    class="ghost ghost-episode"
-                                    type="button"
-                                    aria-label={`${heroCopy.startEpisode}: ${pickLocale(entry.episode.label)}`}
-                                    on:click={() => startEpisode(entry.era.id, entry.episode.id)}
-                                >
-                                    {heroCopy.startEpisode}
-                                </button>
-                            </article>
-                        {/if}
+                        <TimelineCard
+                            stageId={stage.id}
+                            title={stage.title}
+                            era={stage.era}
+                            summary={stage.summary}
+                            progress={stage.progress}
+                            offset={stage.offset}
+                            bgImage={stage.bgImage}
+                            on:click={() => startStage(stage.id)}
+                        />
                     {/if}
                 </div>
             </div>
         {/each}
-        {#if !hasEntries}
-            <article class="story-card era-card empty-card">
-                <p class="card-tag">{heroCopy.eraTag}</p>
-                <h3>{heroCopy.title}</h3>
-                <p class="summary">{heroCopy.body}</p>
-            </article>
-        {/if}
+        <div class="timeline-end">
+            <button
+                type="button"
+                class="end-marker-button"
+                on:click={scrollToTop}
+                aria-label="To the top"
+            >
+                <span class="end-marker" aria-hidden="true">
+                    <span class="end-marker-arrow"></span>
+                </span>
+                <span class="to-top-tooltip" role="tooltip">To the top</span>
+            </button>
+        </div>
     </section>
 </main>
 
@@ -319,11 +373,6 @@
         box-shadow: 0 10px 18px var(--shadow-soft);
     }
 
-    .hero .icon-link:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
-
     .hero .icon-link svg {
         width: 20px;
         height: 20px;
@@ -331,22 +380,23 @@
 
     .lede {
         margin: 0;
-        max-width: 620px;
+        max-width: 520px;
         color: var(--text-muted);
         line-height: 1.6;
     }
 
     .timeline {
+        --spine-end-gap: 38px;
         position: relative;
         display: grid;
-        gap: 1.5rem;
+        gap: 2.2rem;
         padding-top: 4.5rem;
     }
 
     .spine {
         position: absolute;
         top: 0;
-        bottom: 0;
+        bottom: var(--spine-end-gap);
         left: 50%;
         width: 3px;
         transform: translateX(-50%);
@@ -354,7 +404,8 @@
             180deg,
             color-mix(in srgb, var(--accent) 18%, transparent),
             color-mix(in srgb, var(--accent) 68%, transparent),
-            color-mix(in srgb, var(--accent) 22%, transparent)
+            color-mix(in srgb, var(--accent) 34%, transparent) 92%,
+            transparent 100%
         );
         border-radius: 999px;
     }
@@ -394,150 +445,6 @@
         justify-content: flex-start;
     }
 
-    .story-card {
-        width: 100%;
-        max-width: 420px;
-        border-radius: 18px;
-        border: 1px solid var(--outline-soft);
-        padding: 1.15rem 1.2rem;
-        background: linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2));
-        box-shadow: 0 14px 26px var(--shadow-soft);
-        display: grid;
-        gap: 0.75rem;
-    }
-
-    .empty-card {
-        margin: 0 auto;
-    }
-
-    .era-card {
-        padding: 1.35rem 1.35rem 1.25rem;
-        border-color: color-mix(in srgb, var(--accent) 36%, transparent);
-        background:
-            radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 52%),
-            linear-gradient(160deg, var(--card-veil-1), var(--card-veil-2));
-        box-shadow: 0 18px 28px var(--shadow-soft);
-    }
-
-    .era-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 22px 34px var(--shadow-strong);
-    }
-
-    .card-tag {
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-size: 0.62rem;
-        font-weight: 800;
-        color: var(--text-muted);
-    }
-
-    .story-card h3 {
-        margin: 0;
-        font-family: var(--font-display);
-        line-height: 1.25;
-    }
-
-    .era-card h3 {
-        font-size: 1.38rem;
-        line-height: 1.18;
-    }
-
-    .summary {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 0.94rem;
-    }
-
-    .episode-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-    }
-
-    .episode-list span {
-        font-size: 0.7rem;
-        border-radius: 999px;
-        border: 1px solid var(--outline-soft);
-        padding: 0.15rem 0.5rem;
-        color: var(--text-muted);
-    }
-
-    .episode-card {
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        column-gap: 0.8rem;
-        row-gap: 0.45rem;
-        padding: 0.85rem 1rem 0.85rem 1.05rem;
-        border-radius: 13px;
-        border-left: 4px solid color-mix(in srgb, var(--accent) 54%, transparent);
-        background: linear-gradient(
-            165deg,
-            color-mix(in srgb, var(--card-veil-1) 82%, transparent),
-            color-mix(in srgb, var(--card-veil-2) 72%, transparent)
-        );
-        box-shadow: 0 8px 14px var(--shadow-soft);
-    }
-
-    .episode-card:hover {
-        transform: translateY(-1px);
-        border-color: color-mix(in srgb, var(--accent) 58%, transparent);
-        box-shadow: 0 11px 16px var(--shadow-soft);
-    }
-
-    .episode-card h3 {
-        font-size: 0.97rem;
-        font-weight: 650;
-    }
-
-    .episode-card .summary {
-        font-size: 0.82rem;
-    }
-
-    .episode-card .ghost {
-        grid-column: 2;
-        grid-row: 1 / span 3;
-        align-self: center;
-        padding: 0.5rem 0.68rem;
-        font-size: 0.78rem;
-    }
-
-    .ghost-episode {
-        background: color-mix(in srgb, var(--accent) 16%, transparent);
-        border-color: color-mix(in srgb, var(--accent) 35%, var(--outline-soft));
-    }
-
-    .ghost-episode:hover {
-        background: color-mix(in srgb, var(--accent) 26%, transparent);
-    }
-
-    .ghost {
-        border: 1px solid var(--outline-soft);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.35);
-        color: var(--text);
-        padding: 0.56rem 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition:
-            transform 120ms ease,
-            border-color 120ms ease,
-            background 120ms ease;
-        justify-self: start;
-    }
-
-    .ghost:hover {
-        transform: translateY(-1px);
-        border-color: var(--accent);
-        background: rgba(255, 214, 138, 0.18);
-    }
-
-    .ghost:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
-
     .marker-wrap {
         grid-column: 2;
         display: grid;
@@ -555,6 +462,11 @@
         background: var(--panel-veil-1);
         box-shadow: 0 10px 20px var(--shadow-soft);
         --connector-color: var(--outline-strong);
+    }
+
+    .card-slot :global(.stage-card) {
+        max-width: 420px;
+        width: 100%;
     }
 
     .timeline-row.left .marker::before,
@@ -593,6 +505,113 @@
 
     .marker.active .marker-core {
         background: color-mix(in srgb, var(--accent) 95%, transparent);
+    }
+
+    .marker.done {
+        border-color: color-mix(in srgb, var(--success) 80%, transparent);
+        --connector-color: color-mix(in srgb, var(--success) 75%, transparent);
+    }
+
+    .marker.done .marker-core {
+        background: color-mix(in srgb, var(--success) 95%, transparent);
+    }
+
+    .timeline-end {
+        --spine-x: 50%;
+        position: relative;
+        min-height: 72px;
+        margin-top: 0.2rem;
+    }
+
+    .end-marker-button {
+        position: absolute;
+        left: var(--spine-x);
+        top: 0;
+        transform: translateX(-50%);
+        width: 34px;
+        height: 34px;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+    }
+
+    .end-marker {
+        position: absolute;
+        inset: 4px;
+        width: 26px;
+        height: 26px;
+        border-radius: 9px;
+        border: 2px solid color-mix(in srgb, var(--accent) 72%, transparent);
+        display: grid;
+        place-items: center;
+        background: linear-gradient(
+            160deg,
+            color-mix(in srgb, var(--panel-veil-1) 90%, transparent),
+            color-mix(in srgb, var(--panel-veil-2) 88%, transparent)
+        );
+        box-shadow:
+            0 8px 16px var(--shadow-soft),
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .end-marker-arrow {
+        width: 8px;
+        height: 8px;
+        border-left: 2px solid color-mix(in srgb, var(--accent) 92%, transparent);
+        border-top: 2px solid color-mix(in srgb, var(--accent) 92%, transparent);
+        transform: rotate(45deg) translate(1px, 1px);
+    }
+
+    .to-top-tooltip {
+        position: absolute;
+        top: -28px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        border: 1px solid var(--outline-soft);
+        border-radius: 999px;
+        color: var(--text-subtle);
+        padding: 0.2rem 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition:
+            color 120ms ease,
+            opacity 120ms ease,
+            transform 120ms ease;
+    }
+
+    .end-marker-button:hover .to-top-tooltip,
+    .end-marker-button:focus-visible .to-top-tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-2px);
+    }
+
+    .end-marker-button:hover .end-marker {
+        border-color: color-mix(in srgb, var(--accent) 86%, transparent);
+        box-shadow:
+            0 10px 18px var(--shadow-soft),
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent);
+    }
+
+    .end-marker-button:focus-visible {
+        outline: none;
+    }
+
+    .end-marker-button:focus-visible .end-marker {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+
+    .end-marker-button:hover .to-top-tooltip {
+        color: var(--text);
     }
 
     @media (max-width: 900px) {
@@ -650,36 +669,14 @@
             padding-right: 0.8rem;
         }
 
-        .episode-card {
-            grid-template-columns: 1fr;
-        }
-
-        .episode-card .ghost {
-            grid-column: auto;
-            grid-row: auto;
-            justify-self: start;
+        .timeline-end {
+            --spine-x: 32px;
         }
     }
 
     @media (max-width: 640px) {
         .hero {
             padding: 1.6rem;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .hero .icon-link,
-        .ghost,
-        .era-card,
-        .episode-card {
-            transition: none;
-        }
-
-        .hero .icon-link:hover,
-        .ghost:hover,
-        .era-card:hover,
-        .episode-card:hover {
-            transform: none;
         }
     }
 </style>

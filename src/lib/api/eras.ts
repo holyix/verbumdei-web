@@ -40,6 +40,8 @@ type RawEraListItem = {
     name?: string;
     label?: string;
     order?: number;
+    image_path?: string;
+    image_url?: string;
     type?: string;
     episode_count?: number;
 };
@@ -91,11 +93,8 @@ const eraComparator = (a: Era, b: Era) => {
 const episodeComparator = (a: EraEpisode, b: EraEpisode) =>
     a.order - b.order || a.id.localeCompare(b.id);
 
-export const fetchErasWithEpisodes = async (
-    fetchFn: typeof fetch,
-    apiBase: string,
-): Promise<Era[]> => {
-    const listByLocale = await Promise.all(
+const fetchLocalizedEraLists = async (fetchFn: typeof fetch, apiBase: string) =>
+    Promise.all(
         REQUIRED_LOCALES.map(async (locale) => {
             try {
                 const body = await fetchJson(fetchFn, `${apiBase}/v1/eras?lang=${locale}`);
@@ -107,6 +106,9 @@ export const fetchErasWithEpisodes = async (
         }),
     );
 
+const buildErasFromLocalizedLists = (
+    listByLocale: Awaited<ReturnType<typeof fetchLocalizedEraLists>>,
+) => {
     const orderedEraIds: string[] = [];
     const erasMap = new Map<string, Era>();
 
@@ -120,6 +122,7 @@ export const fetchErasWithEpisodes = async (
                     order: resolveEraOrder(eraId, item.order),
                     name: emptyLocales(),
                     label: emptyLocales(),
+                    imagePath: undefined,
                     type: item.type,
                     episodeCount: typeof item.episode_count === "number" ? item.episode_count : 0,
                     books: emptyBooks(),
@@ -130,6 +133,15 @@ export const fetchErasWithEpisodes = async (
             const era = erasMap.get(eraId)!;
             mergeLocalized(era.name, locale, item.name);
             mergeLocalized(era.label, locale, item.label);
+            const imagePath =
+                typeof item.image_path === "string"
+                    ? item.image_path
+                    : typeof item.image_url === "string"
+                      ? item.image_url
+                      : undefined;
+            if (imagePath && !era.imagePath) {
+                era.imagePath = imagePath;
+            }
             if (!era.type && typeof item.type === "string") {
                 era.type = item.type;
             }
@@ -139,6 +151,26 @@ export const fetchErasWithEpisodes = async (
             }
         }
     }
+
+    return { orderedEraIds, erasMap };
+};
+
+export const fetchEras = async (fetchFn: typeof fetch, apiBase: string): Promise<Era[]> => {
+    const listByLocale = await fetchLocalizedEraLists(fetchFn, apiBase);
+    const { orderedEraIds, erasMap } = buildErasFromLocalizedLists(listByLocale);
+
+    return orderedEraIds
+        .map((id) => erasMap.get(id))
+        .filter((item): item is Era => !!item)
+        .sort(eraComparator);
+};
+
+export const fetchErasWithEpisodes = async (
+    fetchFn: typeof fetch,
+    apiBase: string,
+): Promise<Era[]> => {
+    const listByLocale = await fetchLocalizedEraLists(fetchFn, apiBase);
+    const { orderedEraIds, erasMap } = buildErasFromLocalizedLists(listByLocale);
 
     const episodeResponses = await Promise.all(
         orderedEraIds.flatMap((eraId) =>
@@ -161,7 +193,9 @@ export const fetchErasWithEpisodes = async (
         const era = erasMap.get(eraId);
         if (!era) continue;
 
-        const episodesMap = new Map<string, EraEpisode>(era.episodes.map((item) => [item.id, item]));
+        const episodesMap = new Map<string, EraEpisode>(
+            era.episodes.map((item) => [item.id, item]),
+        );
 
         for (const item of items) {
             const episodeId = typeof item.id === "string" ? item.id : "";

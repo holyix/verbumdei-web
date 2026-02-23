@@ -36,6 +36,7 @@ export type Era = {
     order: number;
     name: Record<Locale, string>;
     label: Record<Locale, string>;
+    imagePath?: string;
     type?: string;
     episodeCount: number;
     books: Record<Locale, string[]>;

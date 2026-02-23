@@ -141,8 +141,14 @@
         font-size: 0.82rem;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        color: var(--text-muted);
+        color: color-mix(in srgb, var(--text) 82%, #10243d 18%);
         font-weight: 700;
+        text-shadow: 0 1px 0 color-mix(in srgb, var(--bg) 45%, transparent);
+    }
+
+    :global(:root[data-theme="light"]) .stage-card .era {
+        color: #12263d;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
     }
 
     .status-bar {

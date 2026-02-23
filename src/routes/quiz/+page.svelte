@@ -244,7 +244,8 @@
     };
 
     const toggleTheme = () => {
-        manualTheme = manualTheme === "dark" ? "light" : "dark";
+        const currentTheme = automaticTheme ? getSystemTheme() : manualTheme;
+        manualTheme = currentTheme === "dark" ? "light" : "dark";
         if (typeof localStorage !== "undefined") {
             localStorage.setItem("theme", manualTheme);
         }

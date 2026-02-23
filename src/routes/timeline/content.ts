@@ -4,47 +4,27 @@ export type TimelineHeroText = {
     eyebrow: string;
     title: string;
     body: string;
-    eraTag: string;
-    episodeTag: string;
-    startEra: string;
-    startEpisode: string;
 };
 
 export const timelineHero: Record<Locale, TimelineHeroText> = {
     en: {
         eyebrow: "The path to salvation",
-        title: "Walk the story, era by era",
-        body: "Browse major eras with their episodes mixed in the flow. Jump into an era or start from an individual episode.",
-        eraTag: "Era",
-        episodeTag: "Episode",
-        startEra: "Start era",
-        startEpisode: "Start episode",
+        title: "Walk the story, step by step",
+        body: "Follow the unfolding story from Genesis to the early Church. Each era is a doorway, and every answer moves you forward.",
     },
     es: {
         eyebrow: "El camino a la salvación",
-        title: "Recorre la historia, era por era",
-        body: "Explora las eras principales con episodios integrados en la línea. Entra por era o inicia desde un episodio.",
-        eraTag: "Era",
-        episodeTag: "Episodio",
-        startEra: "Iniciar era",
-        startEpisode: "Iniciar episodio",
+        title: "Recorre la historia, paso a paso",
+        body: "Sigue la historia desde Génesis hasta la Iglesia primitiva. Cada era es una puerta, y cada respuesta te impulsa hacia adelante.",
     },
     pt: {
         eyebrow: "O caminho da salvação",
-        title: "Percorra a história, era por era",
-        body: "Explore eras principais com episódios misturados na linha. Entre por era ou comece por um episódio.",
-        eraTag: "Era",
-        episodeTag: "Episódio",
-        startEra: "Iniciar era",
-        startEpisode: "Iniciar episódio",
+        title: "Percorra a história, passo a passo",
+        body: "Siga a história de Gênesis até a Igreja primitiva. Cada era é uma porta, e cada resposta leva você adiante.",
     },
     sv: {
         eyebrow: "Vägen till frälsning",
-        title: "Vandra berättelsen, era för era",
-        body: "Utforska huvudepoker med episoder inbäddade i flödet. Börja från en epok eller en enskild episod.",
-        eraTag: "Epok",
-        episodeTag: "Episod",
-        startEra: "Starta epok",
-        startEpisode: "Starta episod",
+        title: "Vandra berättelsen, steg för steg",
+        body: "Följ berättelsen från Första Mosebok till den tidiga kyrkan. Varje era är en dörr, och varje svar för dig framåt.",
     },
 };

@@ -109,7 +109,8 @@
     };
 
     const toggleTheme = () => {
-        manualTheme = manualTheme === "dark" ? "light" : "dark";
+        const currentTheme = automaticTheme ? getSystemTheme() : manualTheme;
+        manualTheme = currentTheme === "dark" ? "light" : "dark";
         if (typeof localStorage !== "undefined") {
             localStorage.setItem("theme", manualTheme);
         }
@@ -299,9 +300,7 @@
     ];
 
     $: timelineEpisodeCount = primeEras.reduce((sum, era) => sum + era.episodes.length, 0);
-    $: timelinePreviewEpisodes = primeEras
-        .flatMap((era) => era.episodes)
-        .slice(0, 3);
+    $: timelinePreviewEpisodes = primeEras.flatMap((era) => era.episodes).slice(0, 3);
     $: timelineQuestionCount = timelineEpisodeCount;
 
     onMount(() => {
@@ -440,7 +439,8 @@
                         <span class="pill">{landing.guidedLabel}</span>
                     </p>
                     <p class="era-meta">
-                        {timelineEpisodeCount} {landing.episodeCountLabel}
+                        {timelineEpisodeCount}
+                        {landing.episodeCountLabel}
                     </p>
                 </div>
                 <div>
@@ -475,7 +475,8 @@
                             {era.label[locale] ?? era.label.en}
                         </p>
                         <p class="era-meta">
-                            {era.episodeCount} {landing.episodeCountLabel}
+                            {era.episodeCount}
+                            {landing.episodeCountLabel}
                         </p>
                     </div>
                     <p class="era-body">
@@ -528,17 +529,28 @@
                             <p class="era-line-books">
                                 {era.label[locale] ?? era.label.en}
                             </p>
-                            <p class="era-line-count">{era.episodes.length} {landing.episodeCountLabel}</p>
+                            <p class="era-line-count">
+                                {era.episodes.length}
+                                {landing.episodeCountLabel}
+                            </p>
                         </header>
                         <div class="era-line-progress" aria-hidden="true">
                             <span
                                 style={`width:${Math.min(
                                     100,
-                                    Math.round((era.episodes.length / Math.max(1, era.episodeCount || era.episodes.length)) * 100),
+                                    Math.round(
+                                        (era.episodes.length /
+                                            Math.max(1, era.episodeCount || era.episodes.length)) *
+                                            100,
+                                    ),
                                 )}%`}
                             ></span>
                         </div>
-                        <div class="episode-track" role="list" aria-label={`${era.label[locale] ?? era.label.en} episodes`}>
+                        <div
+                            class="episode-track"
+                            role="list"
+                            aria-label={`${era.label[locale] ?? era.label.en} episodes`}
+                        >
                             {#each era.episodes as episode}
                                 {@const status = episodeStatus(episode.id)}
                                 <article class="episode-compact-card" role="listitem">
@@ -561,7 +573,9 @@
                                             {/if}
                                         </span>
                                     {/if}
-                                    <p class="episode-compact-title">{episode.label[locale] ?? episode.label.en}</p>
+                                    <p class="episode-compact-title">
+                                        {episode.label[locale] ?? episode.label.en}
+                                    </p>
                                     <p class="episode-book-ref">
                                         {#if era.books[locale]?.length}
                                             {era.books[locale][0]}
@@ -1393,7 +1407,6 @@
             min-height: 66vh;
             max-height: calc(100vh - 110px);
         }
-
     }
 
     @media (prefers-reduced-motion: reduce) {

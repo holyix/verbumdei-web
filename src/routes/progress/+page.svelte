@@ -75,7 +75,8 @@
     );
     $: completedEras = data.eras.filter((era) => era.completionPercent >= 100).length;
     $: overallEraPercent = Math.round(
-        data.eras.reduce((sum, era) => sum + era.completionPercent, 0) / Math.max(1, data.eras.length),
+        data.eras.reduce((sum, era) => sum + era.completionPercent, 0) /
+            Math.max(1, data.eras.length),
     );
     $: heroPercent = Math.round((overallEpisodePercent + overallQuestionPercent) / 2);
 
@@ -106,7 +107,8 @@
     };
 
     const toggleTheme = () => {
-        manualTheme = manualTheme === "dark" ? "light" : "dark";
+        const currentTheme = automaticTheme ? getSystemTheme() : manualTheme;
+        manualTheme = currentTheme === "dark" ? "light" : "dark";
         if (typeof localStorage !== "undefined") {
             localStorage.setItem("theme", manualTheme);
         }
@@ -185,7 +187,9 @@
                 <h1>{data.resume.episodeLabel}</h1>
                 <p>{data.resume.eraLabel}</p>
             </div>
-            <p class="metric">{data.resume.completedQuestions}/{data.resume.totalQuestions} questions</p>
+            <p class="metric">
+                {data.resume.completedQuestions}/{data.resume.totalQuestions} questions
+            </p>
             <a href={`/eras/${data.resume.eraId}/episodes/${data.resume.episodeId}`}>Continue</a>
         </section>
     {:else if data.showStartJourneyCta}
