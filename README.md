@@ -1,5 +1,11 @@
 # VerbumDei Web
 
+## About Verbum Dei
+
+Verbum Dei is a Catholic learning project whose web experience, Verbum Quest, invites people to explore Scripture and the Catholic faith through quizzes about Salvation History. Its purpose is to make learning about the Bible and Catholic teaching engaging through multiple-choice questions, answer explanations, and scoring. It is intended for Catholics deepening their understanding of the faith and anyone interested in learning about Scripture from a Catholic perspective.
+
+This repository contains the SvelteKit web application: the interface where learners choose a language, answer questions, and review explanations. It loads quiz content from the companion Verbum Dei API. The documentation below covers the project's design and the setup needed by developers contributing to the web experience.
+
 ## Project design
 - **Vision:** Verbum Quest is a Catholic quiz journey through Salvation History (Creation → Prophets → Christ → Church → Doctrine) with medals and progressive unlocking.
 - **Purpose:** Teach Bible, Catechism, and key Church documents in an engaging, catechetical way.
